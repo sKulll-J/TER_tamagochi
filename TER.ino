@@ -16,7 +16,7 @@
 // DEFINE ------------------------------------------------------
 // PIN des boutons
 #define PIN_A           4   // bouton "valider"
-#define PIN_B           4   // bouton "retour"
+#define PIN_B           99   // bouton "annuler"
 #define PIN_UP          6   // bouton croix directionnelle "haut"
 #define PIN_LEFT        7   // bouton croix directionnelle "gauche"
 #define PIN_DOWN        8   // bouton croix directionnelle "bas"
@@ -82,30 +82,25 @@ void setup()
 
 void loop()
 {
-
-    // menu principal (pour linstant)
-    while(game.current == NONE)
+    // "Menu principal" (pour linstant, changera si on met les ecrans qui changent l'apparence de la console et choisissent le jeu)
+    while (game.current == NONE)
     {
         // choix du jeu avec <- -> et A
         //...
-        // ex :
-        game.current = SNAKE;
-    }
-
-
-    // loop de jeu
-    while(1)
-    {
-        switch tergame {
-            case MEGAMORPION : g_megamorpion(termat, owninput, oppsinpunt);
-            case SNAKE : g_snake(termat, owninput, oppsinput);
-            case TRON : g_tron(termat, owninput, oppsinput);
-            case FANORONA : g_fanorona(termat, owninput, oppsinput);
-        }
         
-        if (tergame.)
-        break;
+        game.current = MEGAMORPION;
     }
+
+    switch tergame {
+        case MEGAMORPION : g_megamorpion(termat, owninput, oppsinpunt);
+        case SNAKE : g_snake(termat, owninput, oppsinput);
+        case TRON : g_tron(termat, owninput, oppsinput);
+        case FANORONA : g_fanorona(termat, owninput, oppsinput);
+    }
+        
+    if (tergame.)
+        game.current = NONE;
+    
 
 }
 
@@ -122,8 +117,7 @@ uint8_t calcul_coordonnee(uint8_t x, uint8_t y)
     uint8_t i;
 
     // lignes impaires : ordre inversé  
-    //? bombre impair a forcément le premier bit à 1
-    if (y & 0x01) {                 
+    if (y & 0x01) { // un nombre impair a forcément le premier bit à 1
         i = (y * MAT_WIDTH) + MAT_WIDTH - x - 1;
     // lignes paires : ordre normal 
     } else {                        
