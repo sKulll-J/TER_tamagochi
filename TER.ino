@@ -63,6 +63,9 @@ mat_t termat = {    // NOTRE MATRICE
 uint8_t owninput = 0;
 uint8_t oppsinput = 0;
 
+// ID PIN cartouche
+uint8_t IDP = 0;
+
 // PROGRAMME PRINCIPAL -----------------------------------------
 void setup()
 {
@@ -83,38 +86,34 @@ void setup()
     pinMode(PIN_CARTOUCHE_1, INPUT);
     pinMode(PIN_CARTOUCHE_2, INPUT);
 
-    uint8_t PC0 = 0;
-    uint8_t PC1 = 0;
-    uint8_t PC2 = 0;
-
     //! pas sur qu'on ai besoin du serial à part pour debug
-    Serial.begin(9600);
+    //Serial.begin(9600);
 
-    initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
+    //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
 
 void loop()
 {
-    // "Menu principal" (pour linstant, changera si on met les ecrans qui changent l'apparence de la console et choisissent le jeu)
+    // "Menu principal"
     while (tergame.current_game == NONE)
     {
-        digitalRead(PIN_CARTOUCHE_0, PC0);
-        digitalRead(PIN_CARTOUCHE_1, PC1);
-        digitalRead(PIN_CARTOUCHE_2, PC2);
-        PC1 <<= 1;
-        PC2 <<= 2;
-        switch (PC0 | PC1 | PC2) {
+        /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
+           Il faut penser à bitshift sinon on overwrite le premier bit
+           ? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
+        */
+        IDP += digitalRead(PIN_CARTOUCHE_0);
+        IDP += digitalRead(PIN_CARTOUCHE_1) << 1;
+        IDP += digitalRead(PIN_CARTOUCHE_2) << 2;
+        switch (IDP) {
             case (MEGAMORPION) : tergame.current_game = MEGAMORPION; break;
-            case (SNAKE) : tergame.current_game = SNAKE; break;
-            case (FANORONA) : tergame.current_game = FANORONA; break;
-            case (TRON) : tergame.current_game = TRON; break;
+            case (SNAKE) :       tergame.current_game = SNAKE;       break;
+            case (FANORONA) :    tergame.current_game = FANORONA;    break;
+            case (TRON) :        tergame.current_game = TRON;        break;
         }        
     }
-
-    
-
     tergame.state = RUN;
  
+    // Appel à la fonction de jeu
     switch (tergame.current_game) {
         case MEGAMORPION : tergame = megamorpion(tergame, owninput, oppsinput);
                             //! debug
@@ -128,15 +127,13 @@ void loop()
 
 
     // interprétation de la matrice reçue qu'il faut update sur l'écran
-    //for (uint8_t i=0; i<MAT_WIDTH; i++) {
-    //    for (uint8_t j=0; j<MAT_HEIGHT; j++) {
-    for (uint8_t k=0; (k & 0xF0) < MAT_WIDTH; k+=16) {
-        for (k; (k & 0xF) < MAT_HEIGHT; k++) {  // et voila 1 byte économisé lol (cest juste un double compteur sur le MSB et LSB d'un octet)
-            switch (tergame.printmatrix[k & 0xF0][k & 0xF]) {
-                case LED_NOIR  : leds[XY(k&0xF0, k&0xF)] = CRGB::Black;
-                case JOUEUR1   : leds[XY(k&0xF0, k&0xF)] = CRGB::Red;
-                case JOUEUR2   : leds[XY(k&0xF0, k&0xF)] = CRGB::Green;
-                case LED_BLANC : leds[XY(k&0xF0, k&0xF)] = CRGB::White; 
+    for (uint8_t i=0; i<MAT_WIDTH; i++) {
+        for (uint8_t j=0; j<MAT_HEIGHT; j++) {
+            switch (tergame.printmatrix[i][j]) {
+                case LED_NOIR  : leds[XY(i,j)] = CRGB::Black;
+                case JOUEUR1   : leds[XY(i,j)] = CRGB::Red;
+                case JOUEUR2   : leds[XY(i,j)] = CRGB::Green;
+                case LED_BLANC : leds[XY(i,j)] = CRGB::White; 
             }   
         }
     }
@@ -180,6 +177,7 @@ uint8_t XY(uint8_t x, uint8_t y)
 
 //? initialise l'écran à du full blanc partout
 //! sert a rien a suprimer
+/*
 void initMatrice(mat_t mat)
 {
     for(int x=0; x<9; x++) {
@@ -190,6 +188,7 @@ void initMatrice(mat_t mat)
         }
     }
 }
+*/
 
 //? actualise chaque channel RGB ? je crois
 void refreshscr(void)

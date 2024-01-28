@@ -25,13 +25,14 @@
     => 6 possibilités
     on met ca dans un uint8 et on l'utilise comme un registre
 */
-#define INPUT_COUNT 6           // nombre de touches totales
 #define INPUT_A     0b00000001
 #define INPUT_B     0b00000010
 #define INPUT_LEFT  0b00000100
 #define INPUT_RIGHT 0b00001000
 #define INPUT_DOWN  0b00010000
 #define INPUT_UP    0b00100000
+#define INPUT_COUNT 6           // nombre de touches totales
+
 
 #define RUN  1
 #define STOP 0
