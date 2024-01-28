@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <FastLED.h>
 #include "terlib.h"
+#include <math.h>
 
 
 // DEFINE ------------------------------------------------------
@@ -46,7 +47,7 @@ void clearscr(void);
 game_t tergame = {
     .current_game = NONE,
     .current_player = 0,
-    .state = 0,     // en cours
+    .state = RUN,
 };
 
 mat_t termat = {    // NOTRE MATRICE
@@ -83,35 +84,52 @@ void setup()
 void loop()
 {
     // "Menu principal" (pour linstant, changera si on met les ecrans qui changent l'apparence de la console et choisissent le jeu)
-    while (game.current == NONE)
+    while (tergame.current == NONE)
     {
         // choix du jeu avec <- -> et A
-        //...
         
-        game.current = MEGAMORPION;
+        
+        tergame.current = MEGAMORPION;
+        tergame.state = RUN;
     }
 
-    switch tergame {
-        case MEGAMORPION : g_megamorpion(termat, owninput, oppsinpunt);
-        case SNAKE : g_snake(termat, owninput, oppsinput);
-        case TRON : g_tron(termat, owninput, oppsinput);
-        case FANORONA : g_fanorona(termat, owninput, oppsinput);
+    switch (tergame.current) {
+        case MEGAMORPION : tergame = megamorpion(tergame, owninput, oppsinpunt);
+        case SNAKE :       tergame = snake(tergame, owninput, oppsinput);
+        case TRON :        tergame = tron(tergame, owninput, oppsinput);
+        case FANORONA :    tergame = fanorona(tergame, owninput, oppsinput);
+    }
+
+    owninput = 0;   // efface l'input pour le prochain input
+
+
+    // interprétation de la matrice reçue qu'il faut update sur l'écran
+    //for (uint8_t i=0; i<MAT_WIDTH; i++) {
+    //    for (uint8_t j=0; j<MAT_HEIGHT; j++) {
+    for (uint8_t k=0; (k & 0xF0) < MAT_WIDTH; k+=16) {
+        for (k; (k & 0xF) < MAT_HEIGHT; k++) {  // et voila 1 byte économisé lol (cest juste un double compteur sur le MSB et LSB d'un octet)
+            switch(termat.led[k & 0xF0][k & 0xF]) {
+                case LED_NOIR  : leds[XY(k&0xF0, k&0xF)] = CRGB::Black;
+                case JOUEUR1   : leds[XY(k&0xF0, k&0xF)] = CRGB::Red;
+                case JOUEUR2   : leds[XY(k&0xF0, k&0xF)] = CRGB::Green;
+                case LED_BLANC : leds[XY(k&0xF0, k&0xF)] = CRGB::White; 
+            }   
+        }
     }
         
-    if (tergame.)
-        game.current = NONE;
-    
-
+    if (tergame.state == STOP)
+        tergame.current = NONE;
 }
 
 
 // FONCTIONS ---------------------------------------------------
-/*  @fn uint8_t calcul_coordonnee(uint8_t x, uint8_t y)
- *  @brief transforme la matrice (daisy chained) en un giga vecteur 1D
- *  @var x [0 - MAT_WIDTH]
- *  @var y [0 - MAT_HEIGHT]
- *  @retval i indice du vecteur
- */
+/* 
+    @fn uint8_t calcul_coordonnee(uint8_t x, uint8_t y)
+    @brief transforme la matrice (daisy chained) en un giga vecteur 1D
+    @var x [0 - MAT_WIDTH]
+    @var y [0 - MAT_HEIGHT]
+    @retval i indice du vecteur
+*/
 uint8_t calcul_coordonnee(uint8_t x, uint8_t y)
 {
     uint8_t i;
