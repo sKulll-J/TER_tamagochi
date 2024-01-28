@@ -9,9 +9,9 @@
 */
 
 #include <stdint.h>
+#include <math.h>
 #include <FastLED.h>
 #include "terlib.h"
-#include <math.h>
 
 
 // DEFINE ------------------------------------------------------
@@ -56,6 +56,8 @@ mat_t termat = {    // NOTRE MATRICE
     .led = {0},
 };
 
+uint8_t owninput = 0;
+uint8_t oppsinput = 0;
 
 // PROGRAMME PRINCIPAL -----------------------------------------
 void setup()
@@ -84,20 +86,19 @@ void setup()
 void loop()
 {
     // "Menu principal" (pour linstant, changera si on met les ecrans qui changent l'apparence de la console et choisissent le jeu)
-    while (tergame.current == NONE)
+    while (tergame.current_game == NONE)
     {
         // choix du jeu avec <- -> et A
         
-        
-        tergame.current = MEGAMORPION;
+        tergame.current_game = MEGAMORPION;
         tergame.state = RUN;
     }
 
-    switch (tergame.current) {
-        case MEGAMORPION : tergame = megamorpion(tergame, owninput, oppsinpunt);
-        case SNAKE :       tergame = snake(tergame, owninput, oppsinput);
-        case TRON :        tergame = tron(tergame, owninput, oppsinput);
-        case FANORONA :    tergame = fanorona(tergame, owninput, oppsinput);
+    switch (tergame.current_game) {
+        case MEGAMORPION : tergame = megamorpion(tergame, owninput, oppsinput);
+        //case SNAKE :       tergame = snake(tergame, owninput);
+        //case TRON :        tergame = tron(tergame, owninput, oppsinput);
+        //case FANORONA :    tergame = fanorona(tergame, owninput, oppsinput);
     }
 
     owninput = 0;   // efface l'input pour le prochain input
@@ -108,7 +109,7 @@ void loop()
     //    for (uint8_t j=0; j<MAT_HEIGHT; j++) {
     for (uint8_t k=0; (k & 0xF0) < MAT_WIDTH; k+=16) {
         for (k; (k & 0xF) < MAT_HEIGHT; k++) {  // et voila 1 byte économisé lol (cest juste un double compteur sur le MSB et LSB d'un octet)
-            switch(termat.led[k & 0xF0][k & 0xF]) {
+            switch (tergame.printmatrix[k & 0xF0][k & 0xF]) {
                 case LED_NOIR  : leds[XY(k&0xF0, k&0xF)] = CRGB::Black;
                 case JOUEUR1   : leds[XY(k&0xF0, k&0xF)] = CRGB::Red;
                 case JOUEUR2   : leds[XY(k&0xF0, k&0xF)] = CRGB::Green;
@@ -118,7 +119,7 @@ void loop()
     }
         
     if (tergame.state == STOP)
-        tergame.current = NONE;
+        tergame.current_game = NONE;
 }
 
 

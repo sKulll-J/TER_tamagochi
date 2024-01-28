@@ -35,6 +35,8 @@
 #define JOUEUR1   1
 #define JOUEUR2   2
 
+#include <stdint.h>
+#include <stdbool.h>
 
 // TYPEDEF -----------------------------------------------------
 typedef struct {  // Matrice de LED
