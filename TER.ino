@@ -42,6 +42,7 @@ CRGB* const leds( leds_plus_safety_pixel + 1);
 // DECLARATION DE FONCTIONS ------------------------------------
 uint8_t XY (uint8_t x, uint8_t y);
 uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
+//! v
 void initMatrice(mat_t mat);
 void refreshscr(void);
 void clearscr(void);
@@ -50,7 +51,7 @@ void clearscr(void);
 // INIT GLOBAL -------------------------------------------------
 game_t tergame = {
     .current_game = NONE,
-    .current_player = 0,
+    .current_player = PLAYER1,
     .state = RUN,
 };
 
@@ -62,6 +63,7 @@ mat_t termat = {    // NOTRE MATRICE
 
 uint8_t owninput = 0;
 uint8_t oppsinput = 0;
+uint8_t terinput = 0;
 
 // ID PIN cartouche
 uint8_t IDP = 0;
@@ -87,7 +89,7 @@ void setup()
     pinMode(PIN_CARTOUCHE_2, INPUT);
 
     //! pas sur qu'on ai besoin du serial à part pour debug
-    //Serial.begin(9600);
+    Serial.begin(9600);
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
@@ -115,7 +117,7 @@ void loop()
  
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
-        case MEGAMORPION : tergame = megamorpion(tergame, owninput, oppsinput);
+        case MEGAMORPION : tergame = megamorpion(tergame, terinput);
                             //! debug
                             Serial.println("jeu : megamorpion"); break;
         //case SNAKE :       tergame = snake(tergame, owninput);
@@ -123,7 +125,7 @@ void loop()
         //case FANORONA :    tergame = fanorona(tergame, owninput, oppsinput);
     }
 
-    owninput = 0;   // efface l'input pour le prochain input
+    terinput = 0;   // efface l'input pour le prochain input
 
 
     // interprétation de la matrice reçue qu'il faut update sur l'écran
@@ -131,8 +133,8 @@ void loop()
         for (uint8_t j=0; j<MAT_HEIGHT; j++) {
             switch (tergame.printmatrix[i][j]) {
                 case LED_NOIR  : leds[XY(i,j)] = CRGB::Black;
-                case JOUEUR1   : leds[XY(i,j)] = CRGB::Red;
-                case JOUEUR2   : leds[XY(i,j)] = CRGB::Green;
+                case PLAYER1   : leds[XY(i,j)] = CRGB::Red;
+                case PLAYER2   : leds[XY(i,j)] = CRGB::Green;
                 case LED_BLANC : leds[XY(i,j)] = CRGB::White; 
             }   
         }

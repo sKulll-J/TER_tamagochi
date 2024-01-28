@@ -1,13 +1,13 @@
+#ifndef TERLIB_H
+#define TERLIB_H
+
 /*
- *  @brief Cette librairie contient tout le code commun à chaque jeu :
+   brief Cette librairie contient tout le code commun à chaque jeu :
  *      - communication entre console
  *      - 
  *
  * 
 */
-
-#ifndef TERLIB_H
-#define TERLIB_H
 
 // DEFINE ------------------------------------------------------
 #define MAT_WIDTH   9   // taille horizontale de la matrice de led
@@ -41,8 +41,8 @@
 
 #define LED_NOIR  0
 #define LED_BLANC 3
-#define JOUEUR1   1
-#define JOUEUR2   2
+#define PLAYER1   1
+#define PLAYER2   2
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -64,7 +64,7 @@ enum game_type {    // choix du jeu actuel (snake, morpion etc)
 
 typedef struct {
     enum game_type current_game;    // jeu actuel choisi 
-    bool current_player;            // qui va jouer le coup suivant
+    uint8_t current_player;            // qui va jouer le coup suivant
     bool state;                     // 0 en cours - 1 partie terminée
     uint8_t printmatrix[9][9];      // matrice à traiter
     bool winlose;
@@ -75,10 +75,10 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-    game_t megamorpion(game_t game, uint8_t owninput, uint8_t oppsinput);
-    game_t snake(game_t game, uint8_t owninput);
-    game_t tron(game_t game, uint8_t owninput, uint8_t oppsinput);
-    game_t fanorona(game_t game, uint8_t owninput, uint8_t oppsinput);
+    game_t megamorpion(game_t game, uint8_t input);
+    game_t snake(game_t game, uint8_t input);
+    game_t tron(game_t game, uint8_t input);
+    game_t fanorona(game_t game, uint8_t input);
 #ifdef __cplusplus
 }
 #endif // __cplusplus
