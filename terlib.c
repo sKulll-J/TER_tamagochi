@@ -15,11 +15,8 @@
     - fonction jeu prend en paramètre tout les inputs et plus tard les inputs adverses
         -> struct input_t owninput et input_t opps_input (ive got opps everywhere)
     - fonction de jeu return une struct game_s qui contient l'état de la partie (en cours/terminée), le winner, la matrice à afficher etc
-
     - gestion d'erreur si aucun adversaire n'est connecté (clignotement rouge ou whatnot)
     - utilisation de registre pour utiliser moins de place (verifier si le code de bitshift prend plus de place que faire avec des uint normaux mais je pense pas)
-
-    
     - déplacement du curseur (couleur blanche pour distinguer des "x/o" déjà placés)
     - update et draw les leds en accord avec la xomatrix
     - check win (scalable sur une minigrid et une megagrid)
@@ -79,8 +76,8 @@ game_t megamorpion(game_t game_data, uint8_t owninput, uint8_t oppsinput)
             }
 
             /* Tout ce bout de code vérifie si chaque minigrid a une victoire
-             * Puis "remonte" d'un cran en sstockant la valeur de la victoire dans une grille 3x3 (megamatrix)
-             * Afin de faire une check_win sur cette matrice là pour déterminer s'il y a un gagnant à la partie
+             * Puis "remonte" d'un cran en stockant la valeur de la victoire dans une grille 3x3 (megamatrix)
+             * Afin de faire une check_win sur cette matrice la pour déterminer s'il y a un gagnant à la partie
             */
             for (uint8_t i=0; i<3; i++) {
                 for (uint8_t j=0; j<3; j++) {
@@ -142,19 +139,4 @@ static uint8_t check_win(float** mat)
     }
 
     return 0;  // revient à renvoyer "la somme de la ligne/colonne/diagonales est un NaN"
-}
-
-game_t snake(game_t game, uint8_t owninput)
-{
-    // je les met là juste le temps qu'on les fasse pske le compilateur veut absolument qu'elles soient qqpart
-    return game;
-}
-
-game_t tron(game_t game, uint8_t owninput, uint8_t oppsinput)
-{
-    return game;
-}
-game_t fanorona(game_t game, uint8_t owninput, uint8_t oppsinput)
-{
-    return game;
 }

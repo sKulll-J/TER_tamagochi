@@ -63,9 +63,15 @@ typedef struct {
 
 
 // DECLARATION DE FONCTIONS ------------------------------------
-game_t megamorpion(game_t game, uint8_t owninput, uint8_t oppsinput);
-game_t snake(game_t game, uint8_t owninput);
-game_t tron(game_t game, uint8_t owninput, uint8_t oppsinput);
-game_t fanorona(game_t game, uint8_t owninput, uint8_t oppsinput);
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+    game_t megamorpion(game_t game, uint8_t owninput, uint8_t oppsinput);
+    game_t snake(game_t game, uint8_t owninput);
+    game_t tron(game_t game, uint8_t owninput, uint8_t oppsinput);
+    game_t fanorona(game_t game, uint8_t owninput, uint8_t oppsinput);
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif
