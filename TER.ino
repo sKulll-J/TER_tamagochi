@@ -8,9 +8,8 @@
  *      - Les variables qui se rapportent au matériel réel doivent être nommées avec le préfixe "ter" e.g. "termat" pour la matrice de led physique
 */
 
-#include <stdint.h>
-#include <FastLED.h>
-#include <math.h>
+#include <stdint.h>     // uint8_t
+#include <FastLED.h>    // bon cest logique
 #include "terlib.h"
 
 

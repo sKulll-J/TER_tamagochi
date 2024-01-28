@@ -43,11 +43,21 @@ game_t megamorpion(game_t game_data, uint8_t input)
 
         init_flag = 0;
     }
-    static float xomatrix[3][3][3][3] = {NAN};  // matrice qui contient les valeurs 0=own, 1=opps, NaN=personne - matrice LOGIQUE du jeu sur lequel on fait les calculs de victoire
-    static uint8_t colmatrix[9][9] = {0};       // matrice qui contient les couleurs 0=noir, 1=couleur J1, 2=couleur J2, 3=blanc(curseur) - matrice AFFICHAGE du jeu sur lequel on change les valeurs des leds
-    static float megamatrix[3][3] = {NAN};      // matrice 3x3 mega contenant les valeurs 0, 1, NaN, inf (inf = égalité sur la minigrille, pas de vainqueur possible)
-    static uint8_t miniwin[3][3];               // couleur de chaque minigrille[x][y]
+    static float xomatrix[3][3][3][3];      // matrice qui contient les valeurs 0=own, 1=opps, NaN=personne - matrice LOGIQUE du jeu sur lequel on fait les calculs de victoire
+    static uint8_t colmatrix[9][9] = {0};   // matrice qui contient les couleurs 0=noir, 1=couleur J1, 2=couleur J2, 3=blanc(curseur) - matrice AFFICHAGE du jeu sur lequel on change les valeurs des leds
+    static float megamatrix[3][3];          // matrice 3x3 mega contenant les valeurs 0, 1, NaN, inf (inf = égalité sur la minigrille, pas de vainqueur possible)
+    static uint8_t miniwin[3][3] = {0};     // couleur de chaque minigrille[x][y]
 
+    for (uint8_t i=0; i<3; i++) {
+        for (uint8_t j=0; j<3; j++) {
+            for (uint8_t k=0; k<3; k++) {
+                for (uint8_t l=0; l<3; l++) {
+                    xomatrix[i][j][k][l] = NAN;
+                    megamatrix[3][3] = NAN;
+                }
+            }
+        }
+    }
 
     // GAME LOOP -----------------------------------------------
     switch (input) {
