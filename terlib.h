@@ -1,6 +1,13 @@
+/*
+ *  @brief Cette librairie contient tout le code commun à chaque jeu :
+ *      - communication entre console
+ *      - 
+ *
+ * 
+*/
+
 #ifndef TERLIB_H
 #define TERLIB_H
-
 
 // DEFINE ------------------------------------------------------
 #define MAT_WIDTH   9   // taille horizontale de la matrice de led
@@ -18,6 +25,7 @@
     => 6 possibilités
     on met ca dans un uint8 et on l'utilise comme un registre
 */
+#define INPUT_COUNT 6           // nombre de touches totales
 #define INPUT_A     0b00000001
 #define INPUT_B     0b00000010
 #define INPUT_LEFT  0b00000100

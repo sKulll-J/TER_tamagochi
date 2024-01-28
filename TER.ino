@@ -11,17 +11,21 @@
 #include <stdint.h>
 #include <math.h>
 #include <FastLED.h>
+
 #include "terlib.h"
 
 
 // DEFINE ------------------------------------------------------
 // PIN des boutons
-#define PIN_A           4   // bouton "valider"
-#define PIN_B           99   // bouton "annuler"
-#define PIN_UP          6   // bouton croix directionnelle "haut"
-#define PIN_LEFT        7   // bouton croix directionnelle "gauche"
-#define PIN_DOWN        8   // bouton croix directionnelle "bas"
-#define PIN_RIGHT       5   // bouton croix directionnelle "droite"
+#define PIN_A            3   // bouton "valider"
+#define PIN_B            4   // bouton "annuler"
+#define PIN_UP           5   // bouton croix directionnelle "haut"
+#define PIN_LEFT         6   // bouton croix directionnelle "gauche"
+#define PIN_DOWN         7   // bouton croix directionnelle "bas"
+#define PIN_RIGHT        8   // bouton croix directionnelle "droite"
+#define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
+#define PIN_CARTOUCHE_1  10  // ---
+#define PIN_CARTOUCHE_2  11  // ---
 
 #define LED_DATA_PIN    2   // pin sur laquelle transite les données de la matrice
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
@@ -75,12 +79,18 @@ void setup()
     pinMode(PIN_LEFT,  INPUT_PULLUP);
     pinMode(PIN_DOWN,  INPUT_PULLUP);
     pinMode(PIN_RIGHT, INPUT_PULLUP);
+    pinMode(PIN_CARTOUCHE_0, INPUT);
+    pinMode(PIN_CARTOUCHE_1, INPUT);
+    pinMode(PIN_CARTOUCHE_2, INPUT);
+
+    uint8_t PC0 = 0;
+    uint8_t PC1 = 0;
+    uint8_t PC2 = 0;
 
     //! pas sur qu'on ai besoin du serial à part pour debug
     Serial.begin(9600);
 
     initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
-
 }
 
 void loop()
@@ -88,14 +98,27 @@ void loop()
     // "Menu principal" (pour linstant, changera si on met les ecrans qui changent l'apparence de la console et choisissent le jeu)
     while (tergame.current_game == NONE)
     {
-        // choix du jeu avec <- -> et A
-        
-        tergame.current_game = MEGAMORPION;
-        tergame.state = RUN;
+        digitalRead(PIN_CARTOUCHE_0, PC0);
+        digitalRead(PIN_CARTOUCHE_1, PC1);
+        digitalRead(PIN_CARTOUCHE_2, PC2);
+        PC1 <<= 1;
+        PC2 <<= 2;
+        switch (PC0 | PC1 | PC2) {
+            case (MEGAMORPION) : tergame.current_game = MEGAMORPION; break;
+            case (SNAKE) : tergame.current_game = SNAKE; break;
+            case (FANORONA) : tergame.current_game = FANORONA; break;
+            case (TRON) : tergame.current_game = TRON; break;
+        }        
     }
 
+    
+
+    tergame.state = RUN;
+ 
     switch (tergame.current_game) {
         case MEGAMORPION : tergame = megamorpion(tergame, owninput, oppsinput);
+                            //! debug
+                            Serial.println("jeu : megamorpion"); break;
         //case SNAKE :       tergame = snake(tergame, owninput);
         //case TRON :        tergame = tron(tergame, owninput, oppsinput);
         //case FANORONA :    tergame = fanorona(tergame, owninput, oppsinput);
