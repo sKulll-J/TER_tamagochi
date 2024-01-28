@@ -52,3 +52,8 @@ void init_input_functions(void)
     input_functions[INPUT_LEFT] = &key_left;
     input_functions[INPUT_RIGHT] = &key_right;   
 }
+
+// je les met là pour le moment
+game_t snake(game_t game, uint8_t input){}
+game_t tron(game_t game, uint8_t input){}
+game_t fanorona(game_t game, uint8_t input){}

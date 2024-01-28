@@ -18,7 +18,7 @@
 */
 
 // DECLARATION DE FONCTIONS ------------------------------------
-static uint8_t check_win(float** mat);
+static uint8_t check_win(float (*mat)[3]); // magie noire
 
 game_t megamorpion(game_t game_data, uint8_t input)
 {
@@ -107,7 +107,7 @@ game_t megamorpion(game_t game_data, uint8_t input)
 
 
 // FONCTIONS ---------------------------------------------------
-static uint8_t check_win(float** mat) 
+static uint8_t check_win(float (*mat)[3])
 {
     uint8_t i, j;
     float col, lin;      // somme de la colonne / somme de la ligne

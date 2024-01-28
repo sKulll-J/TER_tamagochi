@@ -33,16 +33,17 @@
 #define INPUT_UP    0b00100000
 #define INPUT_COUNT 6           // nombre de touches totales
 
+#define RUN         1
+#define STOP        0
+#define WIN         1
+#define LOSE        0
 
-#define RUN  1
-#define STOP 0
-#define WIN  1
-#define LOSE 0
-
-#define LED_NOIR  0
-#define LED_BLANC 3
-#define PLAYER1   1
-#define PLAYER2   2
+#define LED_NOIR    0
+#define LED_BLANC   3
+#define PLAYER1     1
+#define PLAYER2     2
+#define OWN_COLOR   CRGB::Red
+#define OPPS_COLOR  CRGB::Green
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -64,10 +65,10 @@ enum game_type {    // choix du jeu actuel (snake, morpion etc)
 
 typedef struct {
     enum game_type current_game;    // jeu actuel choisi 
-    uint8_t current_player;            // qui va jouer le coup suivant
+    uint8_t current_player;         // qui va jouer le coup suivant
     bool state;                     // 0 en cours - 1 partie terminée
     uint8_t printmatrix[9][9];      // matrice à traiter
-    bool winlose;
+    bool winlose;                   // est-ce que PLAYER1 a gagné ou perdu
 } game_t;
 
 
