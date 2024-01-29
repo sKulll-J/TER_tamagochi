@@ -13,6 +13,14 @@
 #define MAT_WIDTH   9   // taille horizontale de la matrice de led
 #define MAT_HEIGHT  9   // taille verticale   de la matrice de led
 
+//def des pins de boutons
+#define PIN_A            3   // bouton "valider"
+#define PIN_B            4   // bouton "annuler"
+#define PIN_UP           5   // bouton croix directionnelle "haut"
+#define PIN_LEFT         6   // bouton croix directionnelle "gauche"
+#define PIN_DOWN         7   // bouton croix directionnelle "bas"
+#define PIN_RIGHT        8   // bouton croix directionnelle "droite"
+
 // Magic numbers pour le uint8_t input
 /*
     INPUT :
@@ -42,8 +50,8 @@
 #define LED_BLANC   3
 #define PLAYER1     1
 #define PLAYER2     2
-#define OWN_COLOR   CRGB::Red
-#define OPPS_COLOR  CRGB::Green
+#define OWN_COLOR   CRGB::Green
+#define OPPS_COLOR  CRGB::Red
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -80,6 +88,8 @@ extern "C" {
     game_t snake(game_t game, uint8_t input);
     game_t tron(game_t game, uint8_t input);
     game_t fanorona(game_t game, uint8_t input);
+
+    uint8_t readinput(void);
 #ifdef __cplusplus
 }
 #endif // __cplusplus

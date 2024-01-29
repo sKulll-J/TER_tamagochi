@@ -10,17 +10,13 @@
 
 #include <stdint.h>     // uint8_t
 #include <FastLED.h>    // bon cest logique
+#include <time.h>
 #include "terlib.h"
 
 
 // DEFINE ------------------------------------------------------
 // PIN des boutons
-#define PIN_A            3   // bouton "valider"
-#define PIN_B            4   // bouton "annuler"
-#define PIN_UP           5   // bouton croix directionnelle "haut"
-#define PIN_LEFT         6   // bouton croix directionnelle "gauche"
-#define PIN_DOWN         7   // bouton croix directionnelle "bas"
-#define PIN_RIGHT        8   // bouton croix directionnelle "droite"
+
 #define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
 #define PIN_CARTOUCHE_1  10  // ---
 #define PIN_CARTOUCHE_2  11  // ---
@@ -90,7 +86,7 @@ void setup()
     pinMode(PIN_CARTOUCHE_2, INPUT_PULLUP);
 
     //! pas sur qu'on ai besoin du serial à part pour debug
-    Serial.begin(31250);
+    //Serial.begin(31250);
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
@@ -117,35 +113,34 @@ void loop()
             case NONE: break;
             default: break;
         }
-        Serial.print("IDP : ");  
-        Serial.println(7-IDP);  
     }
     tergame.state = RUN;
  
     //if (begintransmission == PAS LE MEME JEU)
       //  goto: choixjeu
-    
+    //set les input
+    terinput=readinput();
+
+
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
-        case MEGAMORPION: tergame = megamorpion(tergame, terinput); Serial.println("megamorpion");break;
+        case MEGAMORPION: tergame = megamorpion(tergame, terinput); break;
                             //! debug
                             //Serial.println("jeu : megamorpion");    
-        case SNAKE      : tergame = snake(tergame, terinput);   Serial.println("snake2");Serial.print(0x10);    break;
-        case TRON       : tergame = tron(tergame, terinput);    Serial.println("tron");    break;
-        case FANORONA   : tergame = fanorona(tergame, terinput); Serial.println("fanorona");   break;
+        case SNAKE      : tergame = snake(tergame, terinput);     break;
+        case TRON       : tergame = tron(tergame, terinput);    break;
+        case FANORONA   : tergame = fanorona(tergame, terinput);    break;
         case NONE: break;
         default: break;
-        Serial.println(tergame.current_game);
     }
 
     terinput = 0;   // efface l'input pour le prochain input
-    clearscr(); //clear l'ecran pour le refresh ~ innutile en vrai
     // Interprétation de la matrice reçue qu'il faut update sur l'écran
     for (uint8_t i=0; i<MAT_WIDTH; i++) {
         for (uint8_t j=0; j<MAT_HEIGHT; j++) {
             switch (tergame.printmatrix[i][j]) {
                 case LED_NOIR : leds[XY(i,j)] = CRGB::Black; break;
-                case PLAYER1  : leds[XY(i,j)] = OWN_COLOR;  Serial.print(i);Serial.print("/");Serial.print(j);Serial.println("\t led = player 1");  break;
+                case PLAYER1  : leds[XY(i,j)] = OWN_COLOR;   break;
                 case PLAYER2  : leds[XY(i,j)] = OPPS_COLOR;  break;
                 case LED_BLANC: leds[XY(i,j)] = CRGB::White;  break;
                 default: break;
@@ -156,6 +151,8 @@ void loop()
     FastLED.show();//permet d'allumer les leds
     
     if (tergame.state == STOP)
+        //Serial.println("-----------STOP GAME-----------");
+        clearscr();
         tergame.current_game = NONE;
 }
 
@@ -227,7 +224,7 @@ void clearscr(void)
 {
     for(int x=0; x<9; x++) {
         for(int y=0; y<9; y++) {
-            leds [XY(x,y)] = CRGB::White;
+            tergame.printmatrix[x][y] =LED_NOIR ; 
         }
     }
 }
