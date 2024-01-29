@@ -44,6 +44,7 @@ uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
 void initMatrice(mat_t mat);
 void refreshscr(void);
 void clearscr(void);
+void tererror(void);
 
 
 // INIT GLOBAL -------------------------------------------------
@@ -96,6 +97,7 @@ void setup()
 
 void loop()
 {
+    //choixjeu:
     // Choix du jeu
     while (tergame.current_game == NONE)
     {
@@ -117,6 +119,9 @@ void loop()
     }
     tergame.state = RUN;
  
+    //if (begintransmission == PAS LE MEME JEU)
+      //  goto: choixjeu
+    
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
         case MEGAMORPION: tergame = megamorpion(tergame, terinput); break;
@@ -217,6 +222,18 @@ void clearscr(void)
     for(int x=0; x<9; x++) {
         for(int y=0; y<9; y++) {
             leds [XY(x,y)] = CRGB::Black;
+        }
+    }
+}
+
+
+void tererror(void)
+{
+    for(int x=0; x<9; x++) {
+        for(int y=0 ; y<9; y++) {
+            mat.led[x][y][0] = 0;
+            mat.led[x][y][1] = 255;
+            mat.led[x][y][2] = 0;
         }
     }
 }
