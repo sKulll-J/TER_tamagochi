@@ -29,7 +29,7 @@
 #define LED_DATA_PIN    2   // pin sur laquelle transite les données de la matrice
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
 #define CHIPSET         WS2812  // osef
-#define BRIGHTNESS      2   // luminosité réglable
+#define BRIGHTNESS      20  // luminosité réglable
 
 
 // JE SAIS PAS OU RANGER CE BOUT DE CODE -----------------------
@@ -44,6 +44,7 @@ uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
 void initMatrice(mat_t mat);
 void refreshscr(void);
 void clearscr(void);
+void tererror(void);
 
 
 // INIT GLOBAL -------------------------------------------------
@@ -84,18 +85,19 @@ void setup()
     pinMode(PIN_LEFT,  INPUT_PULLUP);
     pinMode(PIN_DOWN,  INPUT_PULLUP);
     pinMode(PIN_RIGHT, INPUT_PULLUP);
-    pinMode(PIN_CARTOUCHE_0, INPUT);
-    pinMode(PIN_CARTOUCHE_1, INPUT);
-    pinMode(PIN_CARTOUCHE_2, INPUT);
+    pinMode(PIN_CARTOUCHE_0, INPUT_PULLUP); //met les pins pour detecter que la masse est mise -> 5V fonctionne pas car considéré comme HIGH(toutes tension != 0)
+    pinMode(PIN_CARTOUCHE_1, INPUT_PULLUP);
+    pinMode(PIN_CARTOUCHE_2, INPUT_PULLUP);
 
     //! pas sur qu'on ai besoin du serial à part pour debug
-    //Serial.begin(9600);
+    Serial.begin(31250);
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
 
 void loop()
 {
+    //choixjeu:
     // Choix du jeu
     while (tergame.current_game == NONE)
     {
@@ -103,47 +105,56 @@ void loop()
            Il faut penser à bitshift sinon on overwrite le premier bit
            ? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
         */
-        IDP += digitalRead(PIN_CARTOUCHE_0);
-        IDP += digitalRead(PIN_CARTOUCHE_1) << 1;
-        IDP += digitalRead(PIN_CARTOUCHE_2) << 2;
-        switch (IDP) {
+        IDP=0;
+        IDP |= digitalRead(PIN_CARTOUCHE_0);
+        IDP |= digitalRead(PIN_CARTOUCHE_1) << 1;
+        IDP |= digitalRead(PIN_CARTOUCHE_2) << 2;
+        switch (7-IDP) {
             case MEGAMORPION: tergame.current_game = MEGAMORPION; break;
             case SNAKE      : tergame.current_game = SNAKE;       break;
             case FANORONA   : tergame.current_game = FANORONA;    break;
             case TRON       : tergame.current_game = TRON;        break;
             case NONE: break;
             default: break;
-        }       
+        }
+        Serial.print("IDP : ");  
+        Serial.println(7-IDP);  
     }
     tergame.state = RUN;
  
+    //if (begintransmission == PAS LE MEME JEU)
+      //  goto: choixjeu
+    
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
-        case MEGAMORPION: tergame = megamorpion(tergame, terinput); break;
+        case MEGAMORPION: tergame = megamorpion(tergame, terinput); Serial.println("megamorpion");break;
                             //! debug
                             //Serial.println("jeu : megamorpion");    
-        case SNAKE      : tergame = snake(tergame, terinput);       break;
-        case TRON       : tergame = tron(tergame, terinput);        break;
-        case FANORONA   : tergame = fanorona(tergame, terinput);    break;
+        case SNAKE      : tergame = snake(tergame, terinput);   Serial.println("snake2");Serial.print(0x10);    break;
+        case TRON       : tergame = tron(tergame, terinput);    Serial.println("tron");    break;
+        case FANORONA   : tergame = fanorona(tergame, terinput); Serial.println("fanorona");   break;
         case NONE: break;
         default: break;
+        Serial.println(tergame.current_game);
     }
 
     terinput = 0;   // efface l'input pour le prochain input
-
+    clearscr(); //clear l'ecran pour le refresh ~ innutile en vrai
     // Interprétation de la matrice reçue qu'il faut update sur l'écran
     for (uint8_t i=0; i<MAT_WIDTH; i++) {
         for (uint8_t j=0; j<MAT_HEIGHT; j++) {
             switch (tergame.printmatrix[i][j]) {
                 case LED_NOIR : leds[XY(i,j)] = CRGB::Black; break;
-                case PLAYER1  : leds[XY(i,j)] = OWN_COLOR;   break;
+                case PLAYER1  : leds[XY(i,j)] = OWN_COLOR;  Serial.print(i);Serial.print("/");Serial.print(j);Serial.println("\t led = player 1");  break;
                 case PLAYER2  : leds[XY(i,j)] = OPPS_COLOR;  break;
-                case LED_BLANC: leds[XY(i,j)] = CRGB::White; break;
+                case LED_BLANC: leds[XY(i,j)] = CRGB::White;  break;
                 default: break;
             }   
         }
     }
-        
+    FastLED.setBrightness(BRIGHTNESS);
+    FastLED.show();//permet d'allumer les leds
+    
     if (tergame.state == STOP)
         tergame.current_game = NONE;
 }
@@ -216,7 +227,19 @@ void clearscr(void)
 {
     for(int x=0; x<9; x++) {
         for(int y=0; y<9; y++) {
-            leds [XY(x,y)] = CRGB::Black;
+            leds [XY(x,y)] = CRGB::White;
         }
     }
 }
+
+
+/*void tererror(void)
+{
+    for(int x=0; x<9; x++) {
+        for(int y=0 ; y<9; y++) {
+            mat.led[x][y][0] = 0;
+            mat.led[x][y][1] = 255;
+            mat.led[x][y][2] = 0;
+        }
+    }
+}*/

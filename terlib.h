@@ -56,10 +56,10 @@ typedef struct {  // Matrice de LED
 } mat_t;
 
 enum game_type {    // choix du jeu actuel (snake, morpion etc)
-    NONE,
-    SNAKE,
-    MEGAMORPION,
-    TRON,
+    NONE, //0
+    MEGAMORPION, //1
+    SNAKE, //2
+    TRON,  //3
     FANORONA
 };
 
