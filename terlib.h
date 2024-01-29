@@ -105,6 +105,8 @@ extern "C" {
     game_t snake(game_t game, uint8_t input);
     game_t tron(game_t game, uint8_t input);
     game_t fanorona(game_t game, uint8_t input);
+
+    uint8_t readinput(void);
 #ifdef __cplusplus
 }
 #endif // __cplusplus

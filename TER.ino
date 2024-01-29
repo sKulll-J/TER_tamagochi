@@ -153,6 +153,17 @@ void loop()
         }
     }
 
+    // Gestion des inputs
+    while (terinput == 0) {
+        if (tergame.current_player == PLAYER1) {         // à mon tour de jouer
+            terinput = readinput();
+        } else /*if (tergame.current_player == PLAYER2)*/ {  // au tour de l'adversaire - la condition en commentaire économise 19 octets
+            if (Serial.available() > 0) {
+                terinput = Serial.read();
+            }
+        }
+    }
+
 
 
     // Appel à la fonction de jeu
