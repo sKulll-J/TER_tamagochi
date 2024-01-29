@@ -1,0 +1,22 @@
+{
+    "editor.bracketPairColorization.enabled": true,
+    "diffEditor.codeLens": false,
+    "diffEditor.wordWrap": "inherit",
+    "editor.guides.bracketPairs": true,
+    "editor.minimap.enabled": true,
+    "editor.minimap.scale": 1,
+    "editor.minimap.side": "right",
+    "editor.scrollbar.horizontalScrollbarSize": 12,
+    "editor.stickyScroll.enabled": true,
+    "workbench.silentNotifications": true,
+    "workbench.editor.highlightModifiedTabs": true,
+    "notification.timeout": 3000,
+    "workbench.statusBar.visible": true,
+    "workbench.tab.maximize": false,
+    "workbench.tree.renderIndentGuides": "onHover",
+    "debug.inlineValues": true,
+    "search.lineNumbers": false,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.drawBoldTextInBrightColors": true,
+    "terminal.integrated.rendererType": "canvas"
+}

@@ -25,6 +25,7 @@
 #define PIN_CARTOUCHE_1  10  // ---
 #define PIN_CARTOUCHE_2  11  // ---
 
+// FastLED
 #define LED_DATA_PIN    2   // pin sur laquelle transite les données de la matrice
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
 #define CHIPSET         WS2812  // osef
@@ -38,7 +39,7 @@ CRGB* const leds( leds_plus_safety_pixel + 1);
 
 
 // DECLARATION DE FONCTIONS ------------------------------------
-static uint8_t XY(uint8_t x, uint8_t y);    // static car la fonction est passée de utin16 à uint8, sauf que 9x9 = 81 on a pas besoin de 16 bits pour aller jusque là ; sauf que la fonction est déjà déclarée dans fastLED, donc la foutre en static la rend accessible seulement ici et pas de warning ^^
+static uint8_t XY(uint8_t x, uint8_t y);    // static car la fonction est passée de uint16 à uint8. 9x9 = 81 on a pas besoin de 16 bits pour aller jusque là ; sauf que la fonction est déjà déclarée dans fastLED, donc la foutre en static la rend accessible seulement ici et pas de warning ^^
 uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
 void initMatrice(mat_t mat);
 void refreshscr(void);
@@ -54,7 +55,7 @@ game_t tergame = {
     .winlose = 0,
 };
 
-mat_t termat = {    // NOTRE MATRICE
+mat_t termat = {
     .width = MAT_WIDTH,
     .height = MAT_HEIGHT,
     .led = {0},
@@ -70,13 +71,13 @@ uint8_t IDP = 0;
 // PROGRAMME PRINCIPAL -----------------------------------------
 void setup()
 {
-    // truc de fastled
+    // Trucs de fastled
     FastLED.addLeds<CHIPSET, LED_DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
     FastLED.setMaxPowerInVoltsAndMilliamps(5,500);  //garder absolument
     FastLED.clear();
     FastLED.show();
 
-    // setup pins
+    // Setup pins
     pinMode(PIN_A,     INPUT_PULLUP);
     pinMode(PIN_B,     INPUT_PULLUP);
     pinMode(PIN_UP,    INPUT_PULLUP);
@@ -88,14 +89,14 @@ void setup()
     pinMode(PIN_CARTOUCHE_2, INPUT);
 
     //! pas sur qu'on ai besoin du serial à part pour debug
-    Serial.begin(9600);
+    //Serial.begin(9600);
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
 
 void loop()
 {
-    // "Menu principal"
+    // Choix du jeu
     while (tergame.current_game == NONE)
     {
         /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
@@ -106,38 +107,39 @@ void loop()
         IDP += digitalRead(PIN_CARTOUCHE_1) << 1;
         IDP += digitalRead(PIN_CARTOUCHE_2) << 2;
         switch (IDP) {
-            case MEGAMORPION : tergame.current_game = MEGAMORPION;  break;
-            case SNAKE :       tergame.current_game = SNAKE;        break;
-            case FANORONA :    tergame.current_game = FANORONA;     break;
-            case TRON :        tergame.current_game = TRON;         break;
-            case NONE : break;
+            case MEGAMORPION: tergame.current_game = MEGAMORPION; break;
+            case SNAKE      : tergame.current_game = SNAKE;       break;
+            case FANORONA   : tergame.current_game = FANORONA;    break;
+            case TRON       : tergame.current_game = TRON;        break;
+            case NONE: break;
+            default: break;
         }       
     }
     tergame.state = RUN;
  
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
-        case MEGAMORPION : tergame = megamorpion(tergame, terinput);
+        case MEGAMORPION: tergame = megamorpion(tergame, terinput); break;
                             //! debug
-                            Serial.println("jeu : megamorpion");    break;
-        case SNAKE :       tergame = snake(tergame, terinput);      break;
-        case TRON :        tergame = tron(tergame, terinput);       break;
-        case FANORONA :    tergame = fanorona(tergame, terinput);   break;
-        case NONE : break;
+                            //Serial.println("jeu : megamorpion");    
+        case SNAKE      : tergame = snake(tergame, terinput);       break;
+        case TRON       : tergame = tron(tergame, terinput);        break;
+        case FANORONA   : tergame = fanorona(tergame, terinput);    break;
+        case NONE: break;
+        default: break;
     }
 
     terinput = 0;   // efface l'input pour le prochain input
 
-
-    // interprétation de la matrice reçue qu'il faut update sur l'écran
+    // Interprétation de la matrice reçue qu'il faut update sur l'écran
     for (uint8_t i=0; i<MAT_WIDTH; i++) {
         for (uint8_t j=0; j<MAT_HEIGHT; j++) {
             switch (tergame.printmatrix[i][j]) {
-                case LED_NOIR  : leds[XY(i,j)] = CRGB::Black;   break;
-                case PLAYER1   : leds[XY(i,j)] = OWN_COLOR;     break;
-                case PLAYER2   : leds[XY(i,j)] = OPPS_COLOR;    break;
-                case LED_BLANC : leds[XY(i,j)] = CRGB::White;   break;
-                default : break;
+                case LED_NOIR : leds[XY(i,j)] = CRGB::Black; break;
+                case PLAYER1  : leds[XY(i,j)] = OWN_COLOR;   break;
+                case PLAYER2  : leds[XY(i,j)] = OPPS_COLOR;  break;
+                case LED_BLANC: leds[XY(i,j)] = CRGB::White; break;
+                default: break;
             }   
         }
     }

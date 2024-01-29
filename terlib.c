@@ -54,6 +54,20 @@ void init_input_functions(void)
 }
 
 // je les met là pour le moment
-game_t snake(game_t game, uint8_t input){}
-game_t tron(game_t game, uint8_t input){}
-game_t fanorona(game_t game, uint8_t input){}
+game_t snake(game_t game, uint8_t input)
+{
+    input++;
+    return game;
+}
+
+game_t tron(game_t game, uint8_t input)
+{
+    input++;
+    return game;
+}
+
+game_t fanorona(game_t game, uint8_t input)
+{
+    input++;
+    return game;
+}

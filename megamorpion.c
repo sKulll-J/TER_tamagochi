@@ -1,6 +1,7 @@
 #include <stdint.h> // uint8_t sinon il hurle
 #include <math.h>   // NaN et inf
-#include <time.h>   // rand()
+#include <stdlib.h> // rand()
+#include <time.h>   // time()
 
 #include "terlib.h"
 
@@ -22,19 +23,25 @@ static uint8_t check_win(float (*mat)[3]); // magie noire
 
 game_t megamorpion(game_t game_data, uint8_t input)
 {
-    // DECLARATIONS/INITIALISATIONS ----------------------------
-    srand(time(NULL));
-
-    /* Il faut tout mettre en static parce que la fonction est appelée genre 60 fois par seconde donc il faut pas réinitialiser des valeurs
-       problème : on peut pas mettre des valeurs random dans un static (on veut un random pour commencer au pif qqpart dans la grille)
-       solution : on initialise une seule fois (avec INIT_VALUE qui vaut 255 donc impossible à obtenir avec un rand() % 9)
-                  puis on re-initialise avec des valeurs qu'on veut
-    */
+    // DECLARATIONS --------------------------------------------
     static uint8_t init_flag = 1;
     static uint8_t minix = INIT_VALUE;  // position x sur une minigrille
     static uint8_t miniy = INIT_VALUE;  // position y sur une minigrille
     static uint8_t megax = INIT_VALUE;  // position x sur la megagrille
     static uint8_t megay = INIT_VALUE;  // position y sur la megagrille
+    static float xomatrix[3][3][3][3];  // matrice qui contient les valeurs 0=own, 1=opps, NaN=personne - matrice LOGIQUE du jeu sur lequel on fait les calculs de victoire
+    static float megamatrix[3][3];      // matrice 3x3 mega contenant les valeurs 0, 1, NaN, inf (inf = égalité sur la minigrille, pas de vainqueur possible)
+    static uint8_t colmatrix[9][9];     // matrice qui contient les couleurs 0=noir, 1=couleur J1, 2=couleur J2, 3=blanc(curseur) - matrice AFFICHAGE du jeu sur lequel on change les valeurs des leds
+    static uint8_t miniwin[3][3];       // couleur de chaque minigrille[x][y]
+
+
+    // INITIALISATIONS -----------------------------------------
+    /* Il faut tout mettre en static parce que la fonction est appelée genre 60 fois par seconde donc il faut pas réinitialiser des valeurs
+       problème : on peut pas mettre des valeurs random dans un static (on veut un random pour commencer au pif qqpart dans la grille)
+       solution : on initialise une seule fois (avec INIT_VALUE qui vaut 255 donc impossible à obtenir avec un rand() % 3)
+                  puis on re-initialise avec des valeurs qu'on veut
+    */
+    srand(time(NULL));
     if (init_flag) {
         minix = rand() % 3;
         miniy = rand() % 3;
@@ -43,29 +50,33 @@ game_t megamorpion(game_t game_data, uint8_t input)
 
         init_flag = 0;
     }
-    static float xomatrix[3][3][3][3];      // matrice qui contient les valeurs 0=own, 1=opps, NaN=personne - matrice LOGIQUE du jeu sur lequel on fait les calculs de victoire
-    static uint8_t colmatrix[9][9] = {0};   // matrice qui contient les couleurs 0=noir, 1=couleur J1, 2=couleur J2, 3=blanc(curseur) - matrice AFFICHAGE du jeu sur lequel on change les valeurs des leds
-    static float megamatrix[3][3];          // matrice 3x3 mega contenant les valeurs 0, 1, NaN, inf (inf = égalité sur la minigrille, pas de vainqueur possible)
-    static uint8_t miniwin[3][3] = {0};     // couleur de chaque minigrille[x][y]
 
     for (uint8_t i=0; i<3; i++) {
         for (uint8_t j=0; j<3; j++) {
             for (uint8_t k=0; k<3; k++) {
                 for (uint8_t l=0; l<3; l++) {
-                    xomatrix[i][j][k][l] = NAN;
-                    megamatrix[3][3] = NAN;
+                    xomatrix[i][j][k][l] = NAN; // matrice de jeu vide
                 }
             }
+            megamatrix[i][j] = NAN; // matrice de jeu vide
+            miniwin[i][j] = 0;      // personne n'a gagné !
         }
     }
 
+    for (uint8_t i=0; i<9; i++) {
+        for (uint8_t j=0; j<9; j++) {
+            colmatrix[i][j] = 0;    // matrice vide de tout x/o, donc entierement noire
+        }
+    }
+    
+
     // GAME LOOP -----------------------------------------------
     switch (input) {
-        case INPUT_LEFT :  if (minix > 0) minix--; break;
-        case INPUT_RIGHT : if (minix < 2) minix++; break;
-        case INPUT_DOWN :  if (miniy > 0) miniy--; break;
-        case INPUT_UP :    if (miniy < 2) miniy++; break;
-        case INPUT_A :
+        case INPUT_LEFT : if (minix > 0) minix--; break;
+        case INPUT_RIGHT: if (minix < 2) minix++; break;
+        case INPUT_DOWN : if (miniy > 0) miniy--; break;
+        case INPUT_UP   : if (miniy < 2) miniy++; break;
+        case INPUT_A:
             if (isnan(xomatrix[megax][megay][minix][miniy])) { // si la case est libre
                 xomatrix[megax][megay][minix][miniy] = 0;
                 colmatrix[megax*3+minix][megay*3+miniy] = game_data.current_player;
@@ -73,7 +84,7 @@ game_t megamorpion(game_t game_data, uint8_t input)
             
             colmatrix[megax*3+minix][megay*3+miniy] = LED_BLANC;    // formule magique qui transforme une coordonnee 3x3x3x3 en 9x9
             megax = minix;  // prochain coup dans la même mégacase que le coup joué dans la minicase
-            megay = miniy;
+            megay = miniy;  // ---
 
             //+ protection si ya plus de place possible dans la case, que faire ? tp ailleurs ?
             // for i,j, if xomatrix[prochain x][prochain y][i][j] == NaN
@@ -96,8 +107,11 @@ game_t megamorpion(game_t game_data, uint8_t input)
                         if (miniwin[j][i] == PLAYER2) megamatrix[j][i] = 1;
                     }
 
-                    if (check_win(megamatrix) == PLAYER1) game_data.winlose = WIN;
-                    if (check_win(megamatrix) == PLAYER2) game_data.winlose = LOSE;
+                    switch (check_win(megamatrix)) {
+                        case PLAYER1: game_data.winlose = WIN;  break;
+                        case PLAYER2: game_data.winlose = LOSE; break;
+                        default: break;
+                    }
                 }
             }
 
