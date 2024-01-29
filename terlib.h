@@ -2,11 +2,11 @@
 #define TERLIB_H
 
 /*
-   brief Cette librairie contient tout le code commun à chaque jeu :
+ * @brief Cette librairie contient tout le code commun à chaque jeu :
  *      - communication entre console
- *      - 
- *
- * 
+ *      - la tonne de define
+ *      - les structs/typedef
+ *      - les fonctions de jeu
 */
 
 // DEFINE ------------------------------------------------------

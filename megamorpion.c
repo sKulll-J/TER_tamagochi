@@ -113,9 +113,7 @@ game_t megamorpion(game_t game_data, uint8_t input)
                         default: break;
                     }
                 }
-            }
-
-            
+            }            
             break;
         default : return game_data; // pas d'input = quitte direct le bail
     }
