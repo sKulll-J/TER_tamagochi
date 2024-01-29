@@ -13,6 +13,19 @@
 #define MAT_WIDTH   9   // taille horizontale de la matrice de led
 #define MAT_HEIGHT  9   // taille verticale   de la matrice de led
 
+// PIN des boutons
+#define PIN_RX           0
+#define PIN_TX           1
+#define PIN_A            3   // bouton "valider"
+#define PIN_B            4   // bouton "annuler"
+#define PIN_UP           5   // bouton croix directionnelle "haut"
+#define PIN_LEFT         6   // bouton croix directionnelle "gauche"
+#define PIN_DOWN         7   // bouton croix directionnelle "bas"
+#define PIN_RIGHT        8   // bouton croix directionnelle "droite"
+#define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
+#define PIN_CARTOUCHE_1  10  // ---
+#define PIN_CARTOUCHE_2  11  // ---
+
 // Magic numbers pour le uint8_t input
 /*
     INPUT :
@@ -32,6 +45,7 @@
 #define INPUT_DOWN  0b00010000
 #define INPUT_UP    0b00100000
 #define INPUT_COUNT 6           // nombre de touches totales
+#define MAGIC_NO_INPUT 0xFF     // magie noire
 
 #define RUN         1
 #define STOP        0
@@ -44,6 +58,9 @@
 #define PLAYER2     2
 #define OWN_COLOR   CRGB::Red
 #define OPPS_COLOR  CRGB::Green
+
+// Communication
+#define MAGIC_PAIRING   0xC2
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -63,12 +80,20 @@ enum game_type {    // choix du jeu actuel (snake, morpion etc)
     FANORONA
 };
 
+enum game_mode {
+    UNDEFINED,  // undefined
+    SOLO,       // jeu solo (sans déconner erwann)
+    TBS,        // Turned Based Strategy - Tour par tour
+    RT          // Real-Time
+};
+
 typedef struct {
     enum game_type current_game;    // jeu actuel choisi 
+    enum game_mode mode;            // jeu solo/multi/synchrone
     uint8_t current_player;         // qui va jouer le coup suivant
     bool state;                     // 0 en cours - 1 partie terminée
-    uint8_t printmatrix[9][9];      // matrice à traiter
     bool winlose;                   // est-ce que PLAYER1 a gagné ou perdu
+    uint8_t printmatrix[9][9];      // matrice à traiter
 } game_t;
 
 

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <Arduino.h>
 
 #include "terlib.h"
 
@@ -17,8 +18,8 @@ game_t fanorona(game_t game, uint8_t input)
     return game;
 }
 
-// input
-uint_t readinput(void)
+// Gestion input
+uint8_t readinput(void)
 {
     uint8_t data_input = 0;
 
@@ -31,11 +32,10 @@ uint_t readinput(void)
 
     if (data_input == 0) data_input = MAGIC_NO_INPUT;
     
-    // data_input : 0001 0010
+    return data_input;
 }
 
-uint8 parseinput(void)
+uint8_t parseinput(void)
 {
-
-
+    return 1;
 }

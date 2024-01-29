@@ -25,14 +25,14 @@ game_t megamorpion(game_t game_data, uint8_t input)
 {
     // DECLARATIONS --------------------------------------------
     static uint8_t init_flag = 1;
-    static uint8_t minix = INIT_VALUE;  // position x sur une minigrille
-    static uint8_t miniy = INIT_VALUE;  // position y sur une minigrille
-    static uint8_t megax = INIT_VALUE;  // position x sur la megagrille
-    static uint8_t megay = INIT_VALUE;  // position y sur la megagrille
-    static float xomatrix[3][3][3][3];  // matrice qui contient les valeurs 0=own, 1=opps, NaN=personne - matrice LOGIQUE du jeu sur lequel on fait les calculs de victoire
-    static float megamatrix[3][3];      // matrice 3x3 mega contenant les valeurs 0, 1, NaN, inf (inf = égalité sur la minigrille, pas de vainqueur possible)
-    static uint8_t colmatrix[9][9];     // matrice qui contient les couleurs 0=noir, 1=couleur J1, 2=couleur J2, 3=blanc(curseur) - matrice AFFICHAGE du jeu sur lequel on change les valeurs des leds
-    static uint8_t miniwin[3][3];       // couleur de chaque minigrille[x][y]
+    static uint8_t minix = INIT_VALUE;      // position x sur une minigrille
+    static uint8_t miniy = INIT_VALUE;      // position y sur une minigrille
+    static uint8_t megax = INIT_VALUE;      // position x sur la megagrille
+    static uint8_t megay = INIT_VALUE;      // position y sur la megagrille
+    static float xomatrix[3][3][3][3];      // matrice qui contient les valeurs 0=own, 1=opps, NaN=personne - matrice LOGIQUE du jeu sur lequel on fait les calculs de victoire
+    static float megamatrix[3][3];          // matrice 3x3 mega contenant les valeurs 0, 1, NaN, inf (inf = égalité sur la minigrille, pas de vainqueur possible)
+    static uint8_t colmatrix[9][9] = {0};   // matrice qui contient les couleurs 0=noir, 1=couleur J1, 2=couleur J2, 3=blanc(curseur) - matrice AFFICHAGE du jeu sur lequel on change les valeurs des leds
+    static uint8_t miniwin[3][3] = {0};     // couleur de chaque minigrille[x][y]
 
 
     // INITIALISATIONS -----------------------------------------
@@ -59,16 +59,9 @@ game_t megamorpion(game_t game_data, uint8_t input)
                 }
             }
             megamatrix[i][j] = NAN; // matrice de jeu vide
-            miniwin[i][j] = 0;      // personne n'a gagné !
         }
     }
 
-    for (uint8_t i=0; i<9; i++) {
-        for (uint8_t j=0; j<9; j++) {
-            colmatrix[i][j] = 0;    // matrice vide de tout x/o, donc entierement noire
-        }
-    }
-    
 
     // GAME LOOP -----------------------------------------------
     switch (input) {

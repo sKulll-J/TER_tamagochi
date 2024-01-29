@@ -8,23 +8,13 @@
  *      - Les variables qui se rapportent au matériel réel doivent être nommées avec le préfixe "ter" e.g. "termat" pour la matrice de led physique
 */
 
+#include <Arduino.h>
 #include <stdint.h>     // uint8_t
 #include <FastLED.h>    // bon cest logique
 #include "terlib.h"
 
 
 // DEFINE ------------------------------------------------------
-// PIN des boutons
-#define PIN_A            3   // bouton "valider"
-#define PIN_B            4   // bouton "annuler"
-#define PIN_UP           5   // bouton croix directionnelle "haut"
-#define PIN_LEFT         6   // bouton croix directionnelle "gauche"
-#define PIN_DOWN         7   // bouton croix directionnelle "bas"
-#define PIN_RIGHT        8   // bouton croix directionnelle "droite"
-#define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
-#define PIN_CARTOUCHE_1  10  // ---
-#define PIN_CARTOUCHE_2  11  // ---
-
 // FastLED
 #define LED_DATA_PIN    2   // pin sur laquelle transite les données de la matrice
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
@@ -44,16 +34,17 @@ uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
 void initMatrice(mat_t mat);
 void refreshscr(void);
 void clearscr(void);
-void tererror(void);
+void tererror(uint8_t*** led);
 
 
 // INIT GLOBAL -------------------------------------------------
 game_t tergame = {
     .current_game = NONE,
+    .mode = UNDEFINED,
     .current_player = PLAYER1,
     .state = RUN,
-    .printmatrix = {0},
     .winlose = 0,
+    .printmatrix = {0},
 };
 
 mat_t termat = {
@@ -62,10 +53,13 @@ mat_t termat = {
     .led = {0},
 };
 
+// communication/input
 uint8_t owninput = 0;
 uint8_t oppsinput = 0;
 uint8_t terinput = 0;
-
+uint8_t id_random_own;
+uint8_t id_random_opps;
+uint8_t connected = 0;
 // ID PIN cartouche
 uint8_t IDP = 0;
 
@@ -79,6 +73,8 @@ void setup()
     FastLED.show();
 
     // Setup pins
+    pinMode(PIN_RX, INPUT);
+    pinMode(PIN_TX, OUTPUT);
     pinMode(PIN_A,     INPUT_PULLUP);
     pinMode(PIN_B,     INPUT_PULLUP);
     pinMode(PIN_UP,    INPUT_PULLUP);
@@ -89,15 +85,23 @@ void setup()
     pinMode(PIN_CARTOUCHE_1, INPUT);
     pinMode(PIN_CARTOUCHE_2, INPUT);
 
-    //! pas sur qu'on ai besoin du serial à part pour debug
-    //Serial.begin(9600);
+    Serial.begin(9600);
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
 
 void loop()
 {
-    //choixjeu:
+    /*  Séquence de la gameloop:
+        1. choix du jeu
+        2. initialisation communication RX/TX
+            2.1 appairage des deux consoles
+            2.2 qui commence en premier ? (si jeu tour par tour)
+        3. appel à la fonction de jeu
+        4. execution de la fonction de jeu
+        5. render de la matrice
+    */
+
     // Choix du jeu
     while (tergame.current_game == NONE)
     {
@@ -109,19 +113,48 @@ void loop()
         IDP += digitalRead(PIN_CARTOUCHE_1) << 1;
         IDP += digitalRead(PIN_CARTOUCHE_2) << 2;
         switch (IDP) {
-            case MEGAMORPION: tergame.current_game = MEGAMORPION; break;
-            case SNAKE      : tergame.current_game = SNAKE;       break;
-            case FANORONA   : tergame.current_game = FANORONA;    break;
-            case TRON       : tergame.current_game = TRON;        break;
+            case MEGAMORPION: tergame.current_game = MEGAMORPION;
+                              tergame.mode = TBS;
+                              break; 
+            case SNAKE      : tergame.current_game = SNAKE;
+                              tergame.mode = SOLO;        
+                              break;
+            case FANORONA   : tergame.current_game = FANORONA;    
+                              tergame.mode = TBS;
+                              break;
+            case TRON       : tergame.current_game = TRON;
+                              tergame.mode = RT;
+                              break;
             case NONE: break;
             default: break;
         }       
     }
     tergame.state = RUN;
  
-    //if (begintransmission == PAS LE MEME JEU)
-      //  goto: choixjeu
-    
+    // Communication RX/TX
+    if ((tergame.mode != SOLO) && (!connected)) {
+        // Appairage
+        // Envoit en boucle la data MAGIC_PAIRING jusqu'à ce que OWN reçoit ce meme signal de la part de OPPS
+        while (Serial.read() != MAGIC_PAIRING) {
+            Serial.write(MAGIC_PAIRING);
+        }
+        connected = 1;
+
+        // Qui commence ?
+        if (tergame.mode == TBS) {      // il faut probablement des Serial.available() la dedans 
+            id_random_own = rand();
+            Serial.write(id_random_own);
+            id_random_opps = Serial.read();
+
+            if (id_random_own > id_random_opps)
+                tergame.current_player = PLAYER1;
+            else 
+                tergame.current_player = PLAYER2;
+        }
+    }
+
+
+
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
         case MEGAMORPION: tergame = megamorpion(tergame, terinput); break;
@@ -227,13 +260,13 @@ void clearscr(void)
 }
 
 
-void tererror(void)
+void tererror(uint8_t*** led) // appeller la fonction avec terreror(mat.led);
 {
     for(int x=0; x<9; x++) {
         for(int y=0 ; y<9; y++) {
-            mat.led[x][y][0] = 0;
-            mat.led[x][y][1] = 255;
-            mat.led[x][y][2] = 0;
+            led[x][y][0] = 0;
+            led[x][y][1] = 255;
+            led[x][y][2] = 0;
         }
     }
 }
