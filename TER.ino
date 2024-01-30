@@ -11,15 +11,22 @@
 #include <Arduino.h>
 #include <stdint.h>     // uint8_t
 #include <FastLED.h>    // bon cest logique
+#include <time.h>
 #include "terlib.h"
 
 
 // DEFINE ------------------------------------------------------
+// PIN des boutons
+
+#define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
+#define PIN_CARTOUCHE_1  10  // ---
+#define PIN_CARTOUCHE_2  11  // ---
+
 // FastLED
 #define LED_DATA_PIN    2   // pin sur laquelle transite les données de la matrice
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
 #define CHIPSET         WS2812  // osef
-#define BRIGHTNESS      2   // luminosité réglable
+#define BRIGHTNESS      20  // luminosité réglable
 
 
 // JE SAIS PAS OU RANGER CE BOUT DE CODE -----------------------
@@ -81,11 +88,12 @@ void setup()
     pinMode(PIN_LEFT,  INPUT_PULLUP);
     pinMode(PIN_DOWN,  INPUT_PULLUP);
     pinMode(PIN_RIGHT, INPUT_PULLUP);
-    pinMode(PIN_CARTOUCHE_0, INPUT);
-    pinMode(PIN_CARTOUCHE_1, INPUT);
-    pinMode(PIN_CARTOUCHE_2, INPUT);
+    pinMode(PIN_CARTOUCHE_0, INPUT_PULLUP); //met les pins pour detecter que la masse est mise -> 5V fonctionne pas car considéré comme HIGH(toutes tension != 0)
+    pinMode(PIN_CARTOUCHE_1, INPUT_PULLUP);
+    pinMode(PIN_CARTOUCHE_2, INPUT_PULLUP);
 
-    Serial.begin(9600);
+    //! pas sur qu'on ai besoin du serial à part pour debug
+    //Serial.begin(31250);
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
@@ -109,10 +117,11 @@ void loop()
            Il faut penser à bitshift sinon on overwrite le premier bit
            ? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
         */
-        IDP += digitalRead(PIN_CARTOUCHE_0);
-        IDP += digitalRead(PIN_CARTOUCHE_1) << 1;
-        IDP += digitalRead(PIN_CARTOUCHE_2) << 2;
-        switch (IDP) {
+        IDP = 0;
+        IDP |= digitalRead(PIN_CARTOUCHE_0);
+        IDP |= digitalRead(PIN_CARTOUCHE_1) << 1;
+        IDP |= digitalRead(PIN_CARTOUCHE_2) << 2;
+        switch (7-IDP) {
             case MEGAMORPION: tergame.current_game = MEGAMORPION;
                               tergame.mode = TBS;
                               break; 
@@ -127,7 +136,7 @@ void loop()
                               break;
             case NONE: break;
             default: break;
-        }       
+        }
     }
     tergame.state = RUN;
  
@@ -192,8 +201,12 @@ void loop()
             }   
         }
     }
-        
+    FastLED.setBrightness(BRIGHTNESS);
+    FastLED.show();//permet d'allumer les leds
+    
     if (tergame.state == STOP)
+        //Serial.println("-----------STOP GAME-----------");
+        clearscr();
         tergame.current_game = NONE;
 }
 
@@ -265,7 +278,7 @@ void clearscr(void)
 {
     for(int x=0; x<9; x++) {
         for(int y=0; y<9; y++) {
-            leds [XY(x,y)] = CRGB::Black;
+            tergame.printmatrix[x][y] =LED_NOIR ; 
         }
     }
 }

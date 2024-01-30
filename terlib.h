@@ -13,18 +13,13 @@
 #define MAT_WIDTH   9   // taille horizontale de la matrice de led
 #define MAT_HEIGHT  9   // taille verticale   de la matrice de led
 
-// PIN des boutons
-#define PIN_RX           0
-#define PIN_TX           1
+//def des pins de boutons
 #define PIN_A            3   // bouton "valider"
 #define PIN_B            4   // bouton "annuler"
 #define PIN_UP           5   // bouton croix directionnelle "haut"
 #define PIN_LEFT         6   // bouton croix directionnelle "gauche"
 #define PIN_DOWN         7   // bouton croix directionnelle "bas"
 #define PIN_RIGHT        8   // bouton croix directionnelle "droite"
-#define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
-#define PIN_CARTOUCHE_1  10  // ---
-#define PIN_CARTOUCHE_2  11  // ---
 
 // Magic numbers pour le uint8_t input
 /*
@@ -56,10 +51,12 @@
 #define LED_BLANC   3
 #define PLAYER1     1
 #define PLAYER2     2
-#define OWN_COLOR   CRGB::Red
-#define OPPS_COLOR  CRGB::Green
+#define OWN_COLOR   CRGB::Green
+#define OPPS_COLOR  CRGB::Red
 
 // Communication
+#define PIN_RX           0
+#define PIN_TX           1
 #define MAGIC_PAIRING   0xC2
 
 #include <stdint.h>
