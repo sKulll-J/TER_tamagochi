@@ -40,6 +40,7 @@
 #define INPUT_DOWN  0b00010000
 #define INPUT_UP    0b00100000
 #define INPUT_COUNT 6           // nombre de touches totales
+#define MAGIC_NO_INPUT 0xFF     // magie noire
 
 #define RUN         1
 #define STOP        0
@@ -53,6 +54,11 @@
 #define OWN_COLOR   CRGB::Green
 #define OPPS_COLOR  CRGB::Red
 
+// Communication
+#define PIN_RX           0
+#define PIN_TX           1
+#define MAGIC_PAIRING   0xC2
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -64,19 +70,27 @@ typedef struct {  // Matrice de LED
 } mat_t;
 
 enum game_type {    // choix du jeu actuel (snake, morpion etc)
-    NONE, //0
-    MEGAMORPION, //1
-    SNAKE, //2
-    TRON,  //3
+    NONE,
+    SNAKE,
+    MEGAMORPION,
+    TRON,
     FANORONA
+};
+
+enum game_mode {
+    UNDEFINED,  // undefined
+    SOLO,       // jeu solo (sans déconner erwann)
+    TBS,        // Turned Based Strategy - Tour par tour
+    RT          // Real-Time
 };
 
 typedef struct {
     enum game_type current_game;    // jeu actuel choisi 
+    enum game_mode mode;            // jeu solo/multi/synchrone
     uint8_t current_player;         // qui va jouer le coup suivant
     bool state;                     // 0 en cours - 1 partie terminée
-    uint8_t printmatrix[9][9];      // matrice à traiter
     bool winlose;                   // est-ce que PLAYER1 a gagné ou perdu
+    uint8_t printmatrix[9][9];      // matrice à traiter
 } game_t;
 
 

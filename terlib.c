@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <Arduino.h>
 
 #include "terlib.h"
 
@@ -17,8 +18,7 @@ game_t fanorona(game_t game, uint8_t input)
     return game;
 }
 
-// input
-
+// Gestion input
 uint8_t readinput(void)
 {
     uint8_t data_input = 0;
@@ -36,8 +36,7 @@ uint8_t readinput(void)
     return 63-data_input; //par défaut a 63 soit `0b0011 1111` -> lorsqu'un bouton est cliqué, son bit de ref passe a zero -> return inversion
 }
 
-/*uint8 parseinput(void)
+uint8 parseinput(void)
 {
-
-
-}*/
+    return 1;
+}
