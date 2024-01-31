@@ -56,22 +56,26 @@ game_t snake(game_t game_data, uint8_t input)
         }
     }
 
-
-    //set dir en fonction des input comme definie dans ma documentation
-    switch (input & 0x3C) { //prend uniquement les touches HBGD et pas A ni B
-        case 4:  dir = 1; break; // left
-        case 8:  dir = 3; break; // right
-        case 16: dir = 0; break; // down
-        case 32: dir = 2; break; // up
-        default: break;
+    switch (input) { 
+        case INPUT_LEFT:  dir = 1; break;
+        case INPUT_RIGHT: dir = 3; break;
+        case INPUT_DOWN:  dir = 0; break;
+        case INPUT_UP:    dir = 2; break;
+        default: break; // pas besoin de A ni de B
     }
 
-    //éxécute le main code lorsque'un certain temps s'est écoulé => lissibilité
+    // exécute le main code lorsque'un certain temps s'est écoulé => lisibilité
     if ((millis() - (unsigned long)pasttime) >= 10.0) {
         //ch_lst *p=corpschaine; //def la chaine a modifier
 
         //refresh position de la tete
-        headpos = ((headpos&0xF0) + (((1-(dir&0x01))*((1)-2*((dir&0x02)>>1))) <<4)) | ((headpos&0x0F) + ((dir&0x01)*((1)-2*((dir&0x02)>>1)))); //definit la nouvelle position de la tete > cf docs
+        headpos = ((headpos & 0xF0)                   // explication
+                + (((1 - (dir & 0x01))              // ça sert à ...
+                * ((1) - 2 * ((dir & 0x02) >> 1)))  // là on fait 1 - la valeur du trou noir supermassif
+                << 4))                              // on bitshift ta mere
+                | ((headpos & 0x0F) 
+                + ((dir & 0x01)                     // blabla bla
+                * ((1) - 2 * ((dir & 0x02) >> 1))));// et voilà comment construire une bombe nucélaire
 
         if ((headpos & 0x0F) > 9)  headpos = headpos & 0xF0 | 0x01;
         if ((headpos >> 4) > 9)    headpos = headpos & 0x0F | 0x10;
@@ -105,7 +109,7 @@ game_t snake(game_t game_data, uint8_t input)
 
 
         // Affiche la pomme
-        game_data.printmatrix[(pmpos & 0x0F)-1][(pmpos >> 4)-1] = PLAYER2; 
+        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = PLAYER2; 
 
 
         // Affiche toutes les part du corps
