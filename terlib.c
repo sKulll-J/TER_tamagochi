@@ -36,7 +36,7 @@ uint8_t readinput(void)
     return 63-data_input; //par défaut a 63 soit `0b0011 1111` -> lorsqu'un bouton est cliqué, son bit de ref passe a zero -> return inversion
 }
 
-uint8 parseinput(void)
+uint8_t parseinput(void)
 {
     return 1;
 }

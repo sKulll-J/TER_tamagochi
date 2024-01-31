@@ -208,6 +208,8 @@ void loop()
         //Serial.println("-----------STOP GAME-----------");
         clearscr();
         tergame.current_game = NONE;
+
+    if (tergame.mode == SOLO) delay(200);   // Limite le frame rate sinon ça va trop vite ; même problème pour les jeux RT... mais pour ça un delay bloquant est impensable
 }
 
 
