@@ -7,6 +7,12 @@
 #define FLAG_POMME  0x02
 #define FLAG_OVER   0x04
 
+#define FILTRE_X 0xF0 //4 bits pour pos X
+#define FILTRE_Y 0x0F // 4 bits pour pos Y
+
+#define DIR_HV 0x01 //bits selection horizontal, vertical
+#define DIR_PM 0x02 //bit selection plus, moins
+
 game_t snake(game_t game_data, uint8_t input)
 {
     // DECLARATIONS / INITIALISATIONS --------------------------
@@ -69,25 +75,25 @@ game_t snake(game_t game_data, uint8_t input)
         //ch_lst *p=corpschaine; //def la chaine a modifier
 
         //refresh position de la tete
-        headpos = ((headpos & 0xF0)                   // explication
-                + (((1 - (dir & 0x01))              // ça sert à ...
-                * ((1) - 2 * ((dir & 0x02) >> 1)))  // là on fait 1 - la valeur du trou noir supermassif
+        headpos = ((headpos & FILTRE_X)                   // explication
+                + (((1 - (dir & DIR_HV))              // ça sert à ...
+                * ((1) - 2 * ((dir & DIR_PM) >> 1)))  // là on fait 1 - la valeur du trou noir supermassif
                 << 4))                              // on bitshift ta mere
-                | ((headpos & 0x0F) 
-                + ((dir & 0x01)                     // blabla bla
-                * ((1) - 2 * ((dir & 0x02) >> 1))));// et voilà comment construire une bombe nucélaire
+                | ((headpos & FILTRE_Y) 
+                + ((dir & DIR_HV)                     // blabla bla
+                * ((1) - 2 * ((dir & DIR_PM) >> 1))));// et voilà comment construire une bombe nucélaire
 
-        if ((headpos & 0x0F) > 9)  headpos = headpos & 0xF0 | 0x01;
-        if ((headpos >> 4) > 9)    headpos = headpos & 0x0F | 0x10;
-        if ((headpos & 0x0F) == 0) headpos = headpos & 0xF0 | 0x09;
-        if ((headpos >> 4) == 0)   headpos = headpos & 0x0F | 0x90; 
+        if ((headpos & 0x0F) > 9)  headpos = headpos & FILTRE_X | 0x01;
+        if ((headpos >> 4) > 9)    headpos = headpos & FILTRE_Y | 0x10;
+        if ((headpos & 0x0F) == 0) headpos = headpos & FILTRE_X | 0x09;
+        if ((headpos >> 4) == 0)   headpos = headpos & FILTRE_Y | 0x90; 
 
 
         //mange la pomme
         if (headpos == pmpos) {
             snakesize++; // ajoute 1 à la taille
             // Push(&corpschaine, 0x00);//ajoute une case a ma liste chainee
-            flag |= 0x02; // libere le flag de pm pour replacer une nouvelle pomme
+            flag |= FLAG_POMME; // libere le flag de pm pour replacer une nouvelle pomme
         }
 
 
@@ -101,7 +107,7 @@ game_t snake(game_t game_data, uint8_t input)
                 game_data.state = STOP;
                 game_data.printmatrix[0][0] = LED_BLANC;
 
-                flag |= 0x04; // set le flag d'arret
+                flag |= FLAG_OVER; // set le flag d'arret
             }
         }
         // p->pos = headpos;//attribue la position de la tete a l'elem 0 du corps
@@ -115,7 +121,7 @@ game_t snake(game_t game_data, uint8_t input)
         // Affiche toutes les part du corps
         //p=corpschaine;
         for (int i=0; i<snakesize; i++) {            
-            game_data.printmatrix[(bodypos[i] & 0x0F) - 1][(bodypos[i] >> 4) - 1] = PLAYER1; 
+            game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = PLAYER1; 
             //p=p->prec;
         }
     }
