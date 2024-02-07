@@ -1,7 +1,5 @@
 #include <stdint.h> // uint8_t sinon il hurle
 #include <math.h>   // NaN et inf
-#include <stdlib.h> // rand()
-#include <time.h>   // time()
 
 #include "terlib.h"
 
@@ -41,12 +39,12 @@ game_t megamorpion(game_t game_data, uint8_t input)
        solution : on initialise une seule fois (avec INIT_VALUE qui vaut 255 donc impossible à obtenir avec un rand() % 3)
                   puis on re-initialise avec des valeurs qu'on veut
     */
-    srand(time(NULL));
+
     if (init_flag) {
-        minix = rand() % 3;
-        miniy = rand() % 3;
-        megax = rand() % 3;
-        megay = rand() % 3;
+        minix = random() % 3;
+        miniy = random() % 3;
+        megax = random() % 3;
+        megay = random() % 3;
 
         init_flag = 0;
     }
