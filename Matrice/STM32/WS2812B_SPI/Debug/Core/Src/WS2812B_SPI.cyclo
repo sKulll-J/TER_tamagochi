@@ -1,0 +1,4 @@
+../Core/Src/WS2812B_SPI.c:16:6:LED_set	1
+../Core/Src/WS2812B_SPI.c:24:6:WS2812_Send_Spi	4
+../Core/Src/WS2812B_SPI.c:45:6:WS2812_Send	2
+../Core/Src/WS2812B_SPI.c:54:6:test_0	4
