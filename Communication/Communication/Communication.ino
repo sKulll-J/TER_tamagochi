@@ -5,6 +5,8 @@
 #define RX_PIN 2
 #define TX_PIN 7
 
+#define BT_PIN 8
+
 SoftwareSerial gpsSerial(RX_PIN, TX_PIN); // RX, TX
 
 char buffer[maxCnt];
@@ -18,6 +20,7 @@ void setup() {
     gpsSerial.begin(9600);                 // the gpsSerial baud rate
     Serial.begin(9600);   
     attachInterrupt(digitalPinToInterrupt(RX_PIN), handleRxInterrupt, RISING); //CHANGE - RISING - FALLING
+    pinMode(BT_PIN, INPUT_PULLUP);
 }
 
 void loop() {
@@ -36,7 +39,14 @@ void loop() {
     //clearBufferArray();
    */
     //Serial.println("..");
-    gpsSerial.write(0x4F);
+    if(digitalRead(BT_PIN)==LOW)
+    {
+        gpsSerial.write(0x41);
+    }
+    else
+    {
+        gpsSerial.write(NULL);//can't write 0
+    }
     delay(100);
     count=0;
 }
