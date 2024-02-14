@@ -122,18 +122,18 @@ void loop()
         IDP |= digitalRead(PIN_CARTOUCHE_1) << 1;
         IDP |= digitalRead(PIN_CARTOUCHE_2) << 2;
         switch (7-IDP) {
-            case MEGAMORPION: tergame.current_game = MEGAMORPION;
-                              tergame.mode = TBS;
-                              break; 
-            case SNAKE      : tergame.current_game = SNAKE;
-                              tergame.mode = SOLO;        
-                              break;
-            case FANORONA   : tergame.current_game = FANORONA;    
-                              tergame.mode = TBS;
-                              break;
-            case TRON       : tergame.current_game = TRON;
-                              tergame.mode = RT;
-                              break;
+            case MEGAMORPION:   tergame.current_game = MEGAMORPION;
+                                tergame.mode = TBS;
+                                break; 
+            case FANORONA:  tergame.current_game = FANORONA;    
+                            tergame.mode = TBS;
+                            break;
+            case SNAKE: tergame.current_game = SNAKE;
+                        tergame.mode = SOLO;        
+                        break;
+            case TRON:  tergame.current_game = TRON;
+                        tergame.mode = RT;
+                        break;
             case NONE: break;
             default: break;
         }
@@ -164,9 +164,10 @@ void loop()
 
     // Gestion des inputs
     while (terinput == 0) {
-        if (tergame.current_player == PLAYER1) {         // à mon tour de jouer
+        if (tergame.current_player == PLAYER1) {           // à mon tour de jouer
             terinput = readinput();
-        } else /*if (tergame.current_player == PLAYER2)*/ {  // au tour de l'adversaire - la condition en commentaire économise 19 octets
+        } 
+        else /*if (tergame.current_player == PLAYER2)*/ {  // au tour de l'adversaire - la condition en commentaire économise 2 octets
             if (Serial.available() > 0) {
                 terinput = Serial.read();
             }
@@ -174,15 +175,12 @@ void loop()
     }
 
 
-
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
-        case MEGAMORPION: tergame = megamorpion(tergame, terinput); break;
-                            //! debug
-                            //Serial.println("jeu : megamorpion");    
-        case SNAKE      : tergame = snake(tergame, terinput);       break;
-        case TRON       : tergame = tron(tergame, terinput);        break;
-        case FANORONA   : tergame = fanorona(tergame, terinput);    break;
+        case MEGAMORPION:   tergame = megamorpion(tergame, terinput);   break;  // 2530 octets 
+        case SNAKE:         tergame = snake(tergame, terinput);         break;  // 1274 octets
+        case TRON:          tergame = tron(tergame, terinput);          break;
+        case FANORONA:      tergame = fanorona(tergame, terinput);      break;
         case NONE: break;
         default: break;
     }
@@ -193,10 +191,12 @@ void loop()
     for (uint8_t i=0; i<MAT_WIDTH; i++) {
         for (uint8_t j=0; j<MAT_HEIGHT; j++) {
             switch (tergame.printmatrix[i][j]) {
-                case LED_NOIR : leds[XY(i,j)] = CRGB::Black; break;
-                case PLAYER1  : leds[XY(i,j)] = OWN_COLOR;   break;
-                case PLAYER2  : leds[XY(i,j)] = OPPS_COLOR;  break;
-                case LED_BLANC: leds[XY(i,j)] = CRGB::White; break;
+                case COL_NOIR:  leds[XY(i,j)] = CRGB::Black; break;
+                case COL_BLANC: leds[XY(i,j)] = CRGB::White; break;
+                case COL_OWN:   leds[XY(i,j)] = OWN_COLOR;   break;
+                case COL_OPPS:  leds[XY(i,j)] = OPPS_COLOR;  break;
+                case COL_OWN_CLAIR:  leds[XY(i,j)] = OWN_CLAIR_COLOR;  break;
+                case COL_OPPS_CLAIR: leds[XY(i,j)] = OPPS_CLAIR_COLOR; break;
                 default: break;
             }   
         }
@@ -280,7 +280,7 @@ void clearscr(void)
 {
     for(int x=0; x<9; x++) {
         for(int y=0; y<9; y++) {
-            tergame.printmatrix[x][y] =LED_NOIR ; 
+            tergame.printmatrix[x][y] = COL_NOIR ; 
         }
     }
 }
