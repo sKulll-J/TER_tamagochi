@@ -14,12 +14,12 @@
 #define MAT_HEIGHT  9   // taille verticale   de la matrice de led
 
 //def des pins de boutons
-#define PIN_A            3   // bouton "valider"
-#define PIN_B            4   // bouton "annuler"
-#define PIN_UP           5   // bouton croix directionnelle "haut"
-#define PIN_LEFT         6   // bouton croix directionnelle "gauche"
-#define PIN_DOWN         7   // bouton croix directionnelle "bas"
-#define PIN_RIGHT        8   // bouton croix directionnelle "droite"
+#define PIN_A            6   // bouton "valider"
+#define PIN_B            7   // bouton "annuler"
+#define PIN_UP           3   // bouton croix directionnelle "haut"
+#define PIN_LEFT         2   // bouton croix directionnelle "gauche"
+#define PIN_DOWN         5   // bouton croix directionnelle "bas"
+#define PIN_RIGHT        4   // bouton croix directionnelle "droite"
 
 // Magic numbers pour le uint8_t input
 /*

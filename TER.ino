@@ -23,7 +23,7 @@
 #define PIN_CARTOUCHE_2  11  // ---
 
 // FastLED
-#define LED_DATA_PIN    2   // pin sur laquelle transite les données de la matrice
+#define LED_DATA_PIN    13   // pin sur laquelle transite les données de la matrice
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
 #define CHIPSET         WS2812  // osef
 #define BRIGHTNESS      20  // luminosité réglable
