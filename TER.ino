@@ -14,10 +14,10 @@
 #include <time.h>
 #include "terlib.h"
 
+#define DEBUG true
 
 // DEFINE ------------------------------------------------------
 // PIN des boutons
-
 #define PIN_CARTOUCHE_0  9   // pin pour lire quelle "cartouche" est insérée
 #define PIN_CARTOUCHE_1  10  // ---
 #define PIN_CARTOUCHE_2  11  // ---
@@ -42,6 +42,9 @@ void initMatrice(mat_t mat);
 void refreshscr(void);
 void clearscr(void);
 void tererror(uint8_t*** led);
+uint8_t readCartouche(void);    // fonction qui lit les 3 bits de cartouche
+
+void ledtoggle(void);
 
 
 // INIT GLOBAL -------------------------------------------------
@@ -92,14 +95,22 @@ void setup()
     pinMode(PIN_CARTOUCHE_1, INPUT_PULLUP);
     pinMode(PIN_CARTOUCHE_2, INPUT_PULLUP);
 
-    //! pas sur qu'on ai besoin du serial à part pour debug
-    //Serial.begin(31250);
+    // Debug Arduino
+    pinMode(LED_BUILTIN, OUTPUT);
+
+
+    #if DEBUG
+        Serial.begin(31250);
+    #endif
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
 
 void loop()
 {
+    #if DEBUG
+        Serial.println("*** NOUVELLE LOOP ***");
+    #endif
     /*  Séquence de la gameloop:
         1. choix du jeu
         2. initialisation communication RX/TX
@@ -111,35 +122,46 @@ void loop()
     */
 
     // Choix du jeu
-    while (tergame.current_game == NONE)
-    {
-        /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
-           Il faut penser à bitshift sinon on overwrite le premier bit
-           ? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
-        */
-        IDP = 0;
-        IDP |= digitalRead(PIN_CARTOUCHE_0);
-        IDP |= digitalRead(PIN_CARTOUCHE_1) << 1;
-        IDP |= digitalRead(PIN_CARTOUCHE_2) << 2;
-        switch (7-IDP) {
-            case MEGAMORPION:   tergame.current_game = MEGAMORPION;
+    if (readCartouche() != IDP) { // permet de réinit la console si on enleve la cartouche (feature demandée par erwann)
+        while (tergame.current_game == NONE)
+        {
+            /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
+            Il faut penser à bitshift sinon on overwrite le premier bit
+            ? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
+            */
+            IDP = readCartouche();
+            #if DEBUG
+                //Serial.print("ID = ");
+                //Serial.println(IDP);
+                switch(IDP) {
+                    case MEGAMORPION: Serial.println("Jeu:\tMEGAMORPION"); break;
+                    case FANORONA:    Serial.println("Jeu:\tFANORONA");    break;
+                    case SNAKE:       Serial.println("Jeu:\tSNAKE");       break;
+                    case TRON:        Serial.println("Jeu:\tTRON");        break;
+                    case NONE:        Serial.println("Jeu:\tNONE");        break;
+                    default: break;
+                }
+            #endif
+            switch (IDP) {
+                case MEGAMORPION:   tergame.current_game = MEGAMORPION;
+                                    tergame.mode = TBS;
+                                    break; 
+                case FANORONA:  tergame.current_game = FANORONA;    
                                 tergame.mode = TBS;
-                                break; 
-            case FANORONA:  tergame.current_game = FANORONA;    
-                            tergame.mode = TBS;
+                                break;
+                case SNAKE: tergame.current_game = SNAKE;
+                            tergame.mode = SOLO;
                             break;
-            case SNAKE: tergame.current_game = SNAKE;
-                        tergame.mode = SOLO;        
-                        break;
-            case TRON:  tergame.current_game = TRON;
-                        tergame.mode = RT;
-                        break;
-            case NONE: break;
-            default: break;
+                case TRON:  tergame.current_game = TRON;
+                            tergame.mode = RT;
+                            break;
+                default: break;
+            }
         }
     }
     tergame.state = RUN;
- 
+
+ /*
     // Communication RX/TX
     if ((tergame.mode != SOLO) && (!connected)) {
         // Appairage
@@ -161,19 +183,37 @@ void loop()
                 tergame.current_player = PLAYER2;
         }
     }
-
+*/
     // Gestion des inputs
-    while (terinput == 0) {
-        if (tergame.current_player == PLAYER1) {           // à mon tour de jouer
-            terinput = readinput();
-        } 
-        else /*if (tergame.current_player == PLAYER2)*/ {  // au tour de l'adversaire - la condition en commentaire économise 2 octets
-            if (Serial.available() > 0) {
-                terinput = Serial.read();
+    if (tergame.mode == SOLO) {     // se répete à chaque passage de la game loop
+        terinput = readinput();
+        delay(200);   // Limite le frame rate sinon ça va trop vite ; même problème pour les jeux RT... mais pour ça un delay bloquant est impensable
+    }
+    else if (tergame.mode == TBS) {  // mode bloquant pour les jeux tour par tour
+        while (terinput == 0) {
+            if (tergame.current_player == PLAYER1) {       // à mon tour de jouer
+                terinput = readinput();
+                //? il manque l'envoit de la donnée
+            } 
+            else if (tergame.current_player == PLAYER2) {  // au tour de l'adversaire - la condition en commentaire économise 2 octets
+                if (Serial.available() > 0) {
+                    terinput = Serial.read();
+                }
             }
         }
     }
 
+    #if DEBUG
+        switch(terinput) {
+            case INPUT_A:     Serial.println("Input:\tA");     break;
+            case INPUT_B:     Serial.println("Input:\tB");     break;
+            case INPUT_LEFT:  Serial.println("Input:\tLEFT");  break;
+            case INPUT_RIGHT: Serial.println("Input:\tRIGHT"); break;
+            case INPUT_DOWN:  Serial.println("Input:\tDOWN");  break;
+            case INPUT_UP:    Serial.println("Input:\tUP");    break;
+            default:          Serial.println("Input:\tNONE");  break;
+        }
+    #endif
 
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
@@ -202,14 +242,19 @@ void loop()
         }
     }
     FastLED.setBrightness(BRIGHTNESS);
-    FastLED.show();//permet d'allumer les leds
+    FastLED.show(); //permet d'allumer les leds
     
-    if (tergame.state == STOP)
-        //Serial.println("-----------STOP GAME-----------");
+    if (tergame.state == STOP) {
+        #if DEBUG
+            Serial.println("-----------STOP GAME-----------");
+        #endif
         clearscr();
         tergame.current_game = NONE;
+    }
 
-    if (tergame.mode == SOLO) delay(200);   // Limite le frame rate sinon ça va trop vite ; même problème pour les jeux RT... mais pour ça un delay bloquant est impensable
+    #if DEBUG
+        Serial.println("*** FIN DE LA LOOP ***");
+    #endif
 }
 
 
@@ -295,4 +340,21 @@ void tererror(uint8_t*** led) // appeller la fonction avec terreror(mat.led);
             led[x][y][2] = 0;
         }
     }
+}
+
+uint8_t readCartouche(void)
+{
+    uint8_t IDP = 0;
+    IDP |= digitalRead(PIN_CARTOUCHE_0);
+    IDP |= digitalRead(PIN_CARTOUCHE_1) << 1;
+    IDP |= digitalRead(PIN_CARTOUCHE_2) << 2;
+    return IDP;
+}
+
+void ledtoggle(void)
+{
+    static uint8_t mode = 1;
+
+    mode = !mode;
+    digitalWrite(LED_BUILTIN, mode);
 }

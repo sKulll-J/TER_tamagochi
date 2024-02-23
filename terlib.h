@@ -58,9 +58,9 @@
 #define COL_OPPS_CLAIR  5
 
 // couleur réelle à changer selon quelle console on flashe
-#define OWN_COLOR  CRGB::Red
-#define OWN_CLAIR_COLOR CRGB(100, 255, 100) // rouge clair
-#define OPPS_COLOR CRGB::Blue
+#define OWN_COLOR        CRGB(0, 255, 0)
+#define OWN_CLAIR_COLOR  CRGB(100, 255, 100) // rouge clair
+#define OPPS_COLOR       CRGB(0, 0, 255)
 #define OPPS_CLAIR_COLOR CRGB(100, 100, 255) // bleu clair
 
 

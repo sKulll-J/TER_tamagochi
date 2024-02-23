@@ -14,6 +14,7 @@
 #define DIR_HV 0x01 // bits selection horizontal, vertical
 #define DIR_PM 0x02 // bit selection plus, moins
 
+
 game_t snake(game_t game_data, uint8_t input)
 {
     // DECLARATIONS / INITIALISATIONS --------------------------
@@ -116,13 +117,13 @@ game_t snake(game_t game_data, uint8_t input)
 
 
         // Affiche la pomme
-        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = PLAYER2; 
+        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OWN; 
 
 
         // Affiche toutes les part du corps
         //p=corpschaine;
         for (int i=0; i<snakesize; i++) {            
-            game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = PLAYER1; 
+            game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = COL_OPPS; 
             //p=p->prec;
         }
     }
