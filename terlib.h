@@ -46,13 +46,23 @@
 #define STOP        0
 #define WIN         1
 #define LOSE        0
-
-#define LED_NOIR    0
-#define LED_BLANC   3
 #define PLAYER1     1
 #define PLAYER2     2
-#define OWN_COLOR   CRGB::Green
-#define OPPS_COLOR  CRGB::Red
+
+// indice palette qui se trouve dans la printmatrix
+#define COL_NOIR        0
+#define COL_BLANC       1
+#define COL_OWN         2
+#define COL_OWN_CLAIR   3
+#define COL_OPPS        4
+#define COL_OPPS_CLAIR  5
+
+// couleur réelle à changer selon quelle console on flashe
+#define OWN_COLOR  CRGB::Red
+#define OWN_CLAIR_COLOR CRGB(100, 255, 100) // rouge clair
+#define OPPS_COLOR CRGB::Blue
+#define OPPS_CLAIR_COLOR CRGB(100, 100, 255) // bleu clair
+
 
 // Communication
 #define PIN_RX           0

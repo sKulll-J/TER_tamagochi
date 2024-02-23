@@ -1,5 +1,6 @@
 #include <stdint.h> // uint8_t sinon il hurle
 #include <stdlib.h>
+#include <Arduino.h> // millis
 
 #include "terlib.h"
 
@@ -7,11 +8,11 @@
 #define FLAG_POMME  0x02
 #define FLAG_OVER   0x04
 
-#define FILTRE_X 0xF0 //4 bits pour pos X
+#define FILTRE_X 0xF0 // 4 bits pour pos X
 #define FILTRE_Y 0x0F // 4 bits pour pos Y
 
-#define DIR_HV 0x01 //bits selection horizontal, vertical
-#define DIR_PM 0x02 //bit selection plus, moins
+#define DIR_HV 0x01 // bits selection horizontal, vertical
+#define DIR_PM 0x02 // bit selection plus, moins
 
 game_t snake(game_t game_data, uint8_t input)
 {
@@ -39,13 +40,13 @@ game_t snake(game_t game_data, uint8_t input)
 
         case FLAG_POMME:     //placement d'une nouvelle pomme
             pmpos = ((random() % 9 + 1) << 4) | (random() % 9 + 1);
-            game_data.printmatrix[0][0] = LED_BLANC;
+            game_data.printmatrix[0][0] = COL_BLANC;
             flag &= 0xFD; //set bit de flag à 0
             break;
 
         case FLAG_OVER:  //detecte si partie est finie
             headpos = 0x55;
-            pmpos = NULL; 
+            pmpos = 99; // bien en dehors de la grille de jeu 
             dir = 0x03;
             snakesize = 3;
             flag = 0x03;
@@ -58,7 +59,7 @@ game_t snake(game_t game_data, uint8_t input)
     //set la matrice en noir -> pas nécessaire si clrscrn() dans le main
     for (uint8_t i=0; i<9; i++) {
         for (uint8_t j=0; j<9; j++) {   
-            game_data.printmatrix[i][j] = LED_NOIR;
+            game_data.printmatrix[i][j] = COL_NOIR;
         }
     }
 
@@ -83,10 +84,10 @@ game_t snake(game_t game_data, uint8_t input)
                 + ((dir & DIR_HV)                     // blabla bla
                 * ((1) - 2 * ((dir & DIR_PM) >> 1))));// et voilà comment construire une bombe nucélaire
 
-        if ((headpos & 0x0F) > 9)  headpos = headpos & FILTRE_X | 0x01;
-        if ((headpos >> 4) > 9)    headpos = headpos & FILTRE_Y | 0x10;
-        if ((headpos & 0x0F) == 0) headpos = headpos & FILTRE_X | 0x09;
-        if ((headpos >> 4) == 0)   headpos = headpos & FILTRE_Y | 0x90; 
+        if ((headpos & 0x0F) > 9)  headpos = (headpos & FILTRE_X) | 0x01;
+        if ((headpos >> 4) > 9)    headpos = (headpos & FILTRE_Y) | 0x10;
+        if ((headpos & 0x0F) == 0) headpos = (headpos & FILTRE_X) | 0x09;
+        if ((headpos >> 4) == 0)   headpos = (headpos & FILTRE_Y) | 0x90; 
 
 
         //mange la pomme
@@ -105,7 +106,7 @@ game_t snake(game_t game_data, uint8_t input)
             //detecte si la tete est dans le corps
             if (bodypos[snakesize-1-i] == headpos) {
                 game_data.state = STOP;
-                game_data.printmatrix[0][0] = LED_BLANC;
+                game_data.printmatrix[0][0] = COL_BLANC;
 
                 flag |= FLAG_OVER; // set le flag d'arret
             }

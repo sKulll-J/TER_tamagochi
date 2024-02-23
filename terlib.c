@@ -12,11 +12,6 @@ game_t tron(game_t game, uint8_t input)
     return game;
 }
 
-game_t fanorona(game_t game, uint8_t input)
-{
-    input++;
-    return game;
-}
 
 // Gestion input
 uint8_t readinput(void)
@@ -24,11 +19,11 @@ uint8_t readinput(void)
     uint8_t data_input = 0;
 
     data_input |= (digitalRead(PIN_A) & INPUT_A);
-    data_input |= (digitalRead(PIN_B)<<1 & INPUT_B);
-    data_input |= (digitalRead(PIN_LEFT)<<2 & INPUT_LEFT);
-    data_input |= (digitalRead(PIN_RIGHT)<<3 & INPUT_RIGHT);
-    data_input |= (digitalRead(PIN_DOWN)<<4 & INPUT_DOWN);
-    data_input |= (digitalRead(PIN_UP)<<5 & INPUT_UP);
+    data_input |= (digitalRead(PIN_B) << 1 & INPUT_B);
+    data_input |= (digitalRead(PIN_LEFT) << 2 & INPUT_LEFT);
+    data_input |= (digitalRead(PIN_RIGHT) << 3 & INPUT_RIGHT);
+    data_input |= (digitalRead(PIN_DOWN) << 4 & INPUT_DOWN);
+    data_input |= (digitalRead(PIN_UP) << 5 & INPUT_UP);
 
     //if (data_input == 0) data_input = MAGIC_NO_INPUT;
     
