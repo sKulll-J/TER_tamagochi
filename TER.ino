@@ -6,6 +6,7 @@
 #include <time.h>
 #include <stdlib.h>
 
+#define DEBUG true
 
 #define DEBUG_input true
 #define DEBUG true
@@ -140,6 +141,9 @@ void setup()
 // LOOP ----------------------------------------------------
 void loop()
 {
+    #if DEBUG
+        Serial.println("*** NOUVELLE LOOP ***");
+    #endif
     /*  Séquence de la gameloop:
         1. choix du jeu
         2. initialisation communication RX/TX
