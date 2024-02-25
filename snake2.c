@@ -73,7 +73,7 @@ game_t snake(game_t game_data, uint8_t input)
     }
 
     // exécute le main code lorsque'un certain temps s'est écoulé => lisibilité
-    if ((millis() - (unsigned long)pasttime) >= 10.0) {
+    if (true) {
         //ch_lst *p=corpschaine; //def la chaine a modifier
 
         //refresh position de la tete

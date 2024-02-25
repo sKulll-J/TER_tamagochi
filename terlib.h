@@ -16,8 +16,8 @@
 //def des pins de boutons
 #define PIN_A            6   // bouton "valider"
 #define PIN_B            7   // bouton "annuler"
-#define PIN_UP           3   // bouton croix directionnelle "haut"
-#define PIN_LEFT         2   // bouton croix directionnelle "gauche"
+#define PIN_UP           8   // bouton croix directionnelle "haut"
+#define PIN_LEFT         9   // bouton croix directionnelle "gauche"
 #define PIN_DOWN         5   // bouton croix directionnelle "bas"
 #define PIN_RIGHT        4   // bouton croix directionnelle "droite"
 
@@ -65,8 +65,8 @@
 
 
 // Communication
-#define PIN_RX           0
-#define PIN_TX           1
+#define PIN_RX           2
+#define PIN_TX           3
 #define MAGIC_PAIRING   0xC2
 
 #include <stdint.h>

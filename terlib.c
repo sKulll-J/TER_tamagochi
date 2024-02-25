@@ -6,11 +6,11 @@
 
 
 // je les met là pour le moment
-game_t tron(game_t game, uint8_t input)
+/*game_t tron(game_t game, uint8_t input)
 {
     input++;
     return game;
-}
+}*/
 
 
 // Gestion input
