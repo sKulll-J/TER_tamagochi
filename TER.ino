@@ -14,6 +14,10 @@
 #include <time.h>
 #include "terlib.h"
 
+<<<<<<< Updated upstream
+=======
+#define DEBUG 1
+>>>>>>> Stashed changes
 
 // DEFINE ------------------------------------------------------
 // PIN des boutons
@@ -80,8 +84,8 @@ void setup()
     FastLED.show();
 
     // Setup pins
-    pinMode(PIN_RX, INPUT);
-    pinMode(PIN_TX, OUTPUT);
+    //pinMode(PIN_RX, INPUT);
+    //pinMode(PIN_TX, OUTPUT);
     pinMode(PIN_A,     INPUT_PULLUP);
     pinMode(PIN_B,     INPUT_PULLUP);
     pinMode(PIN_UP,    INPUT_PULLUP);
@@ -92,14 +96,37 @@ void setup()
     pinMode(PIN_CARTOUCHE_1, INPUT_PULLUP);
     pinMode(PIN_CARTOUCHE_2, INPUT_PULLUP);
 
+<<<<<<< Updated upstream
     //! pas sur qu'on ai besoin du serial à part pour debug
     //Serial.begin(31250);
+=======
+    // Debug Arduino
+    pinMode(LED_BUILTIN, OUTPUT);
+
+
+    #if( DEBUG)
+        Serial.begin(9600);  
+    #endif
+>>>>>>> Stashed changes
 
     //initMatrice(termat); //? POURQUOI FAIRE CETTE FONCTION SERT A RIEN LOL
 }
 
 void loop()
 {
+<<<<<<< Updated upstream
+=======
+
+    #if DEBUG
+        Serial.print("\n***Debut LOOP***\n");
+
+        
+
+    #endif
+
+    
+    
+>>>>>>> Stashed changes
     /*  Séquence de la gameloop:
         1. choix du jeu
         2. initialisation communication RX/TX
@@ -111,6 +138,7 @@ void loop()
     */
 
     // Choix du jeu
+<<<<<<< Updated upstream
     while (tergame.current_game == NONE)
     {
         /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
@@ -123,6 +151,37 @@ void loop()
         IDP |= digitalRead(PIN_CARTOUCHE_2) << 2;
         switch (7-IDP) {
             case MEGAMORPION:   tergame.current_game = MEGAMORPION;
+=======
+    if (readCartouche() != IDP) { // permet de réinit la console si on enleve la cartouche (feature demandée par erwann)
+        while (tergame.current_game == NONE)
+        {
+            /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
+            Il faut penser à bitshift sinon on overwrite le premier bit
+            ? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
+            */
+            IDP = 7-readCartouche();
+            #if DEBUG
+                Serial.print("ID = ");
+                Serial.print(IDP);
+                Serial.print("\n");
+            #endif  
+            /*    switch(IDP) 
+                {
+                    case MEGAMORPION: Serial.print("Jeu:\tMEGAMORPION\n"); break;
+                    case FANORONA:    Serial.print("Jeu:\tFANORONA\n");    break;
+                    case SNAKE:       Serial.print("Jeu:\tSNAKE\n");       break;
+                    case TRON:        Serial.print("Jeu:\tTRON\n");        break;
+                    case NONE:        Serial.print("Jeu:\tNONE\n");        break;
+                default: Serial.print("Jau:\terror");
+                }
+            #endif*/
+
+            switch (IDP) {
+                case MEGAMORPION:   tergame.current_game = MEGAMORPION;
+                                    tergame.mode = TBS;
+                                    break; 
+                case FANORONA:  tergame.current_game = FANORONA;    
+>>>>>>> Stashed changes
                                 tergame.mode = TBS;
                                 break; 
             case FANORONA:  tergame.current_game = FANORONA;    
@@ -161,7 +220,12 @@ void loop()
                 tergame.current_player = PLAYER2;
         }
     }
+<<<<<<< Updated upstream
 
+=======
+*/
+    terinput = 0;   // efface l'input pour le prochain input
+>>>>>>> Stashed changes
     // Gestion des inputs
     while (terinput == 0) {
         if (tergame.current_player == PLAYER1) {           // à mon tour de jouer
@@ -173,7 +237,31 @@ void loop()
             }
         }
     }
+<<<<<<< Updated upstream
 
+=======
+    #if DEBUG
+        Serial.print("Input : ");
+        Serial.print(terinput, BIN);
+        Serial.print("\n");
+    #endif
+
+    /*#if DEBUG
+        Serial.print("Input : ");
+        Serial.print(terinput, BIN);
+        Serial.print("\n");
+        /*switch(terinput) {
+            case INPUT_A:     Serial.print("Input:\tA");     break;
+            case INPUT_B:     Serial.print("Input:\tB");     break;
+            case INPUT_LEFT:  Serial.print("Input:\tLEFT");  break;
+            case INPUT_RIGHT: Serial.print("Input:\tRIGHT"); break;
+            case INPUT_DOWN:  Serial.print("Input:\tDOWN");  break;
+            case INPUT_UP:    Serial.print("Input:\tUP");    break;
+            default:          Serial.print("Input:\tNONE");  break;
+        }
+    #endif
+    */
+>>>>>>> Stashed changes
 
     // Appel à la fonction de jeu
     switch (tergame.current_game) {
@@ -185,7 +273,6 @@ void loop()
         default: break;
     }
 
-    terinput = 0;   // efface l'input pour le prochain input
 
     // Interprétation de la matrice reçue qu'il faut update sur l'écran
     for (uint8_t i=0; i<MAT_WIDTH; i++) {
@@ -204,12 +291,25 @@ void loop()
     FastLED.setBrightness(BRIGHTNESS);
     FastLED.show();//permet d'allumer les leds
     
+<<<<<<< Updated upstream
     if (tergame.state == STOP)
         //Serial.println("-----------STOP GAME-----------");
+=======
+    if (tergame.state == STOP) {
+        /*#if DEBUG
+            Serial.print("-----------STOP GAME-----------\n");
+        #endif*/
+>>>>>>> Stashed changes
         clearscr();
         tergame.current_game = NONE;
 
+<<<<<<< Updated upstream
     if (tergame.mode == SOLO) delay(200);   // Limite le frame rate sinon ça va trop vite ; même problème pour les jeux RT... mais pour ça un delay bloquant est impensable
+=======
+    #if DEBUG
+        Serial.print("*** FIN DE LA LOOP ***\n");
+    #endif
+>>>>>>> Stashed changes
 }
 
 
