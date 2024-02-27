@@ -70,9 +70,41 @@ game_t fanorona(game_t game_data, uint8_t input)
 
 
 
+/*
+#define TICK_RATE 200 // milliseconds, whatever
+game_t game = load_game();
+uint64_t time = 0;
+uint64_t time_last = 0;
+
+while (1)
+{
+    time = get_time();
+    if (time - time_last > TICK_RATE)
+    {
+        snake(input);
+        megamorpion()
+        render(game_data.printmatrix);
+
+        time_last = time;
+        input = 0;
+    }
+
+    if (input == 0) input = readinput();
+
+    sleep(10); // to avoid busy waiting
+}
+
+---
+// game.c
+
+void update(game_t* game)
+{
+    // update game state
+    // disregard any time considerations
+}
 
 
-
+*/
 
 
 

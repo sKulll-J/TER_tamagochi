@@ -41,7 +41,7 @@ game_t snake(game_t game_data, uint8_t input)
 
         case FLAG_POMME:     //placement d'une nouvelle pomme
             pmpos = ((random() % 9 + 1) << 4) | (random() % 9 + 1);
-            game_data.printmatrix[0][0] = COL_BLANC;
+            game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPPS; 
             flag &= 0xFD; //set bit de flag à 0
             break;
 
@@ -57,13 +57,6 @@ game_t snake(game_t game_data, uint8_t input)
     }
     
 
-    //set la matrice en noir -> pas nécessaire si clrscrn() dans le main
-    for (uint8_t i=0; i<9; i++) {
-        for (uint8_t j=0; j<9; j++) {   
-            game_data.printmatrix[i][j] = COL_NOIR;
-        }
-    }
-
     switch (input) { 
         case INPUT_LEFT:  dir = 1; break;
         case INPUT_RIGHT: dir = 3; break;
@@ -77,13 +70,13 @@ game_t snake(game_t game_data, uint8_t input)
         //ch_lst *p=corpschaine; //def la chaine a modifier
 
         //refresh position de la tete
-        headpos = ((headpos & FILTRE_X)                   // explication
-                + (((1 - (dir & DIR_HV))              // ça sert à ...
-                * ((1) - 2 * ((dir & DIR_PM) >> 1)))  // là on fait 1 - la valeur du trou noir supermassif
-                << 4))                              // on bitshift ta mere
-                | ((headpos & FILTRE_Y) 
-                + ((dir & DIR_HV)                     // blabla bla
-                * ((1) - 2 * ((dir & DIR_PM) >> 1))));// et voilà comment construire une bombe nucélaire
+        headpos = ((headpos & FILTRE_X)                // explication
+                + (((1 - (dir & DIR_HV))               // ça sert à ...
+                * ((1) - 2 * ((dir & DIR_PM) >> 1)))   // là on fait 1 - la valeur du trou noir supermassif
+                << 4))                                 // on bitshift ta mere
+                | ((headpos & FILTRE_Y)                // PITIE ERWANN DONNE DES EXPLICATIONS
+                + ((dir & DIR_HV)                      // blabla bla
+                * ((1) - 2 * ((dir & DIR_PM) >> 1)))); // et voilà comment construire une bombe nucélaire
 
         if ((headpos & 0x0F) > 9)  headpos = (headpos & FILTRE_X) | 0x01;
         if ((headpos >> 4) > 9)    headpos = (headpos & FILTRE_Y) | 0x10;
@@ -117,8 +110,7 @@ game_t snake(game_t game_data, uint8_t input)
 
 
         // Affiche la pomme
-        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OWN; 
-
+        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPPS; 
 
         // Affiche toutes les part du corps
         //p=corpschaine;
@@ -126,6 +118,7 @@ game_t snake(game_t game_data, uint8_t input)
             game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = COL_OPPS; 
             //p=p->prec;
         }
+        
     }
 /*
     switch case droite gauche haut bas
