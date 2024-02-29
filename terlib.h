@@ -101,6 +101,7 @@ typedef struct {
     bool state;                     // 0 en cours - 1 partie terminée
     bool winlose;                   // est-ce que PLAYER1 a gagné ou perdu
     uint8_t printmatrix[9][9];      // matrice à traiter
+    unsigned long game_time;
 } game_t;
 
 

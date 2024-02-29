@@ -59,6 +59,7 @@ game_t tergame = {
     .state = RUN,
     .winlose = 0,
     .printmatrix = {0},
+    .game_time = 0,
 };
 
 mat_t termat = {
@@ -76,6 +77,8 @@ uint8_t id_random_opps;
 uint8_t connected = 0;
 // ID PIN cartouche
 uint8_t IDP = 0;
+
+
 
 
 // PROGRAMME PRINCIPAL -----------------------------------------
@@ -117,6 +120,9 @@ void loop()
     //#if DEBUG
         Serial.print("\n*** NOUVELLE LOOP ***\n");
     //#endif
+    tergame.game_time = millis();//set actual time to game time
+
+    Serial.println(tergame.game_time);
 
     /*  Séquence de la gameloop:
         1. choix du jeu
@@ -209,10 +215,11 @@ void loop()
         if (tergame.current_player == PLAYER1) {       // à mon tour de jouer
                 tergame.current_player = PLAYER2;
                 terinput = readinput();
+                Serial.write(terinput);
                 //? il manque l'envoit de la donnée
             } 
         else if (tergame.current_player == PLAYER2) {  // au tour de l'adversaire - la condition en commentaire économise 2 octets
-            tergame.current_player = PLAYER1;+
+            tergame.current_player = PLAYER1;
             if (Serial.available() > 0) {
                 terinput = Serial.read();
             }
