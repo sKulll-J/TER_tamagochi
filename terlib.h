@@ -1,6 +1,8 @@
 #ifndef TERLIB_H
 #define TERLIB_H
 
+#define NANO_axel
+
 /*
  * @brief Cette librairie contient tout le code commun à chaque jeu :
  *      - communication entre console
@@ -13,13 +15,44 @@
 #define MAT_WIDTH   9   // taille horizontale de la matrice de led
 #define MAT_HEIGHT  9   // taille verticale   de la matrice de led
 
-//def des pins de boutons
-#define PIN_A            6   // bouton "valider"
-#define PIN_B            7   // bouton "annuler"
-#define PIN_UP           3   // bouton croix directionnelle "haut"
-#define PIN_LEFT         2   // bouton croix directionnelle "gauche"
-#define PIN_DOWN         5   // bouton croix directionnelle "bas"
-#define PIN_RIGHT        4   // bouton croix directionnelle "droite"
+#ifdef UNO_axel
+    // PIN de boutons
+    #define PIN_A            6   // bouton "valider"
+    #define PIN_B            7   // bouton "annuler"
+    #define PIN_UP           3   // bouton croix directionnelle "haut"
+    #define PIN_DOWN         5   // bouton croix directionnelle "gauche"
+    #define PIN_LEFT         2   // bouton croix directionnelle "bas"
+    #define PIN_RIGHT        4   // bouton croix directionnelle "droite"
+
+    // PIN de la cartouche
+    #define PIN_CARTOUCHE_0  8   // pin pour lire quelle "cartouche" est insérée
+    #define PIN_CARTOUCHE_1  10  // ---
+    #define PIN_CARTOUCHE_2  12  // ---
+
+    // Fastled
+    #define LED_DATA_PIN    13   // pin sur laquelle transite les données de la matrice
+#endif
+
+#ifdef NANO_axel
+    // PIN de boutons
+    #define PIN_A      6    // 24
+    #define PIN_B      7    // 25
+    #define PIN_DOWN   2    // 20
+    #define PIN_LEFT  14    // 27
+    #define PIN_UP    15    // 26
+    #define PIN_RIGHT 16    // 25
+
+    // Fastled
+    #define LED_DATA_PIN    3   // 21 
+
+    // PIN de la cartouche 
+    #define PIN_CARTOUCHE_0  12  // 30
+    #define PIN_CARTOUCHE_1  11  // 29
+    #define PIN_CARTOUCHE_2  10  // 28
+
+    
+#endif
+
 
 // Magic numbers pour le uint8_t input
 /*
@@ -44,7 +77,7 @@
 #define MAGIC_NO_INPUT 0xFF     // magie noire
 
 #define RUN         1
-#define STOP        0
+#define ter_STOP        0
 #define WIN         1
 #define LOSE        0
 #define PLAYER1     0   // utilisable en tant que booléen pour inverser facilement avec "!"
@@ -60,14 +93,14 @@
 
 // couleur réelle à changer selon quelle console on flashe
 // (R)OUGE, (B)LEU, (V)ERT, (J)AUNE, (M)AGENTA
-#define R 0
-#define B 1
-#define V 2
-#define J 3
-#define M 4
+#define ter_R 0
+#define ter_B 1
+#define ter_V 2
+#define ter_J 3
+#define ter_M 4
 
-#define COULEUR_J1 J
-#define COULEUR_J2 M
+#define COULEUR_J1 ter_J
+#define COULEUR_J2 ter_M
 
 #define ROUGE     CRGB(0, 255, 0)
 #define ROUGE_C   CRGB(255, 119, 119)
@@ -81,37 +114,37 @@
 #define MAGENTA_C CRGB(255, 120, 255);
 
 // Couleur du joueur 1 (OWN)
-#if COULEUR_J1 == R
+#if COULEUR_J1 == ter_R
     #define OWN_COLOR        ROUGE
     #define OWN_CLAIR_COLOR  ROUGE_C
-#elif COULEUR_J1 == B
+#elif COULEUR_J1 == ter_B
     #define OWN_COLOR        BLEU
     #define OWN_CLAIR_COLOR  BLEU_C
-#elif COULEUR_J1 == V
+#elif COULEUR_J1 == ter_V
     #define OWN_COLOR        VERT
     #define OWN_CLAIR_COLOR  VERT_C
-#elif COULEUR_J1 == J
+#elif COULEUR_J1 == ter_J
     #define OWN_COLOR        JAUNE
     #define OWN_CLAIR_COLOR  JAUNE_C
-#elif COULEUR_J1 == M
+#elif COULEUR_J1 == ter_M
     #define OWN_COLOR        MAGENTA
     #define OWN_CLAIR_COLOR  MAGENTA_C
 #endif
 
 // Couleur du joueur 2 (OPPS)
-#if COULEUR_J2 == R
+#if COULEUR_J2 == ter_R
     #define OPPS_COLOR        ROUGE
     #define OPPS_CLAIR_COLOR  ROUGE_C
-#elif COULEUR_J2 == B
+#elif COULEUR_J2 == ter_B
     #define OPPS_COLOR        BLEU
     #define OPPS_CLAIR_COLOR  BLEU_C
-#elif COULEUR_J2 == V
+#elif COULEUR_J2 == ter_V
     #define OPPS_COLOR        VERT
     #define OPPS_CLAIR_COLOR  VERT_C
-#elif COULEUR_J2 == J
+#elif COULEUR_J2 == ter_J
     #define OPPS_COLOR        JAUNE
     #define OPPS_CLAIR_COLOR  JAUNE_C
-#elif COULEUR_J2 == M
+#elif COULEUR_J2 == ter_M
     #define OPPS_COLOR        MAGENTA
     #define OPPS_CLAIR_COLOR  MAGENTA_C
 #endif
@@ -159,6 +192,14 @@ typedef struct {
     uint8_t previous_printmatrix[9][9]; // matrice à traiter du coup d'avant
 } game_t;
 
+typedef struct {
+    uint8_t state;
+    uint8_t prev_state; // etat précédent du bouton - sert à detecter un front montant eviter les rebond etc
+    uint8_t pin;
+    uint8_t bitshift;
+    uint8_t bin;
+} btn_t;
+
 
 // DECLARATION DE FONCTIONS ------------------------------------
 #ifdef __cplusplus
@@ -167,10 +208,8 @@ extern "C" {
     game_t snake(game_t game_data, uint8_t input);
     game_t megamorpion(game_t game_data, uint8_t input);
     game_t fanorona(game_t game_data, uint8_t input);
-    game_t tron(game_t game_data, uint8_t owninput, uint8_t oppsinput);
+    game_t tron(game_t game_data, uint8_t input);
     game_t selector(game_t game_data, uint8_t input); // pour debug
-
-    uint8_t readinput(void);
 #ifdef __cplusplus
 }
 #endif // __cplusplus

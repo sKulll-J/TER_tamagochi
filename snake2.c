@@ -99,7 +99,7 @@ game_t snake(game_t game_data, uint8_t input)
 
             //detecte si la tete est dans le corps
             if (bodypos[snakesize-1-i] == headpos) {
-                game_data.state = STOP;
+                game_data.state = ter_STOP;
                 game_data.printmatrix[0][0] = COL_BLANC;
 
                 flag |= FLAG_OVER; // set le flag d'arret

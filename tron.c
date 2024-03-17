@@ -4,10 +4,9 @@
 
 #include "terlib.h"
 
-game_t tron(game_t game_data, uint8_t owninput, uint8_t oppsinput)
+game_t tron(game_t game_data, uint8_t input)
 {
-    owninput++;
-    oppsinput++;
+    input++;
     game_data.printmatrix[5][3] = COL_BLANC;
     
     return game_data;

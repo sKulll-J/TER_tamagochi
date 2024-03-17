@@ -48,6 +48,7 @@ game_t megamorpion(game_t game_data, uint8_t input)
     static uint8_t flag_input = 1;
 
     // INITIALISATIONS -----------------------------------------
+    /*
     if (flag_input == 1) {
         // Position initiale
         minix = rand() % 3;
@@ -76,11 +77,11 @@ game_t megamorpion(game_t game_data, uint8_t input)
 
         flag_input = 0;
     }
-
+    */
     
     // GAME LOOP -----------------------------------------------
+    /*
     color_matching(game_data, &col_current, &col_current_clair);
-
     
     if (input != INPUT_A) {  // magie noire (INPUT_A = 0b0000 0001 donc ça ne prend en compte que les directions et B)
         game_data.printmatrix[x][y] = game_data.previous_printmatrix[x][y];    // sert à effacer l'ancienne position du selecteur
@@ -99,7 +100,7 @@ game_t megamorpion(game_t game_data, uint8_t input)
             /*  Tout ce bout de code vérifie si chaque minigrid a une victoire
                 *  Puis "remonte" d'un cran en stockant la valeur de la victoire dans une grille 3x3 (megawin)
                 *  Afin de faire une check_win sur cette matrice la pour déterminer s'il y a un gagnant à la partie
-                */
+                /
             for (uint8_t i=0; i<3; i++) {
                 for (uint8_t j=0; j<3; j++) {
                     if (miniwin[j][i] == COL_NOIR) {                // si ya deja une win il faut pas revérifier
@@ -138,6 +139,8 @@ game_t megamorpion(game_t game_data, uint8_t input)
             
     }
     //else return game_data; // pas d'input = quitte direct le bail
+
+    */
     
     return game_data;
 }
