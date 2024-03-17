@@ -41,9 +41,9 @@ typedef struct
 game_t fanorona(game_t game_data, uint8_t input) 
 {
     // DECLARATIONS --------------------------------------------
-    static uint8_t plateau[5][9] = {0};    // plateau de jeu
-    static x = 5;
-    static y = 3;
+    static uint8_t pion[5][9] = {0};    // grille de jeu
+    static uint8_t x = 5;
+    static uint8_t y = 3;
     static uint8_t flag_pion = NOT_SELECTED;
 
 
