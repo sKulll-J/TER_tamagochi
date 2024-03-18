@@ -187,12 +187,13 @@ void loop()
 
                 case SELECTOR:     
                     tergame.current_game = SELECTOR;
-                    tergame.mode = SOLO;
+                    tergame.mode = RT;
                     tergame.state = RUN;
                     #if DEBUG
                         Serial.println("\tSELECTOR");
                     #endif
                     break;
+                    
                 default: 
                     #if DEBUG
                         Serial.print("\n");
