@@ -28,20 +28,23 @@
 */
 #define INPUT_A     0b00000001
 #define INPUT_B     0b00000010
-#define INPUT_LEFT  0b00000100
-#define INPUT_RIGHT 0b00001000
-#define INPUT_DOWN  0b00010000
-#define INPUT_UP    0b00100000
+#define INPUT_L  0b00000100
+#define INPUT_R 0b00001000
+#define INPUT_D  0b00010000
+#define INPUT_U    0b00100000
 #define INPUT_INIT  0b10000000  // pas vraiment un input, mais sert de flag en quelque sorte
 #define INPUT_COUNT 6           // nombre de touches totales
 #define MAGIC_NO_INPUT 0xFF     // magie noire
 
 #define RUN         1
-#define ter_STOP        0
+#define ter_STOP    0
 #define WIN         1
 #define LOSE        0
 #define PLAYER1     0   // utilisable en tant que booléen pour inverser facilement avec "!"
 #define PLAYER2     1   // utilisable en tant que booléen pour inverser facilement avec "!"
+
+// Rx Tx
+#define MAGIC_PAIRING 0x2c
 
 // game_type - choix du jeu actuel (snake, morpion etc)
 #define NONE        0

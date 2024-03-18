@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
+
 #include "terlib.h"
+#include "color.h"
 
 #define OWN 1
 #define OPPS 2
@@ -41,7 +43,7 @@ typedef struct
 game_t fanorona(game_t game_data, uint8_t input) 
 {
     // DECLARATIONS --------------------------------------------
-    static uint8_t pion[5][9] = {0};    // grille de jeu
+    static uint8_t plateau[5][9] = {0};    // grille de jeu
     static uint8_t x = 5;
     static uint8_t y = 3;
     static uint8_t flag_pion = NOT_SELECTED;
@@ -50,12 +52,12 @@ game_t fanorona(game_t game_data, uint8_t input)
     // GAME LOOP -----------------------------------------------
     if (flag_pion == NOT_SELECTED) { // mode selection du pion à bouger
         switch (input) {
-            case INPUT_LEFT:  if (x > 0) x--; break;
-            case INPUT_RIGHT: if (x < 9) x++; break;
-            case INPUT_DOWN:  if (y > 0) y--; break;
-            case INPUT_UP:    if (y < 5) y++; break;
+            case INPUT_L:  if (x > 0) x--; break;
+            case INPUT_R: if (x < 9) x++; break;
+            case INPUT_D:  if (y > 0) y--; break;
+            case INPUT_U:    if (y < 5) y++; break;
             case INPUT_A: 
-                if (game_data.current_player == pion[y][x]) {   // si le joueur a selectionné un de ses pions
+                if (game_data.current_player == plateau[y][x]) {   // si le joueur a selectionné un de ses pions
                     flag_pion = SELECTED; 
                 } else {
                     // joue un petit "bip" (si on ajoute un système audio)
@@ -66,10 +68,10 @@ game_t fanorona(game_t game_data, uint8_t input)
         }
     } else if (flag_pion == SELECTED) { // mode déplacement du pion sélectionné
         switch (input) {
-            case INPUT_LEFT:  if (x > 0) x--; break;
-            case INPUT_RIGHT: if (x < 9) x++; break;
-            case INPUT_DOWN:  if (y > 0) y--; break;
-            case INPUT_UP:    if (y < 5) y++; break;
+            case INPUT_L:  if (x > 0) x--; break;
+            case INPUT_R: if (x < 9) x++; break;
+            case INPUT_D:  if (y > 0) y--; break;
+            case INPUT_U:    if (y < 5) y++; break;
             case INPUT_A: break; // rien
             case INPUT_B: 
             
@@ -113,8 +115,8 @@ uint8_t check_win(uint8_t plateau[5][9])
     {
         for(int j = 0 ; j<9 ; j++)
         {
-            if (pion[i][j] == 1)    pion_J1 = 1 ;
-            else if (pion[i][j] == 2)    pion_J2 = 1 ;
+            if (plateau[i][j] == 1)    pion_J1 = 1 ;
+            else if (plateau[i][j] == 2)    pion_J2 = 1 ;
         }
     }
 

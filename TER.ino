@@ -1,4 +1,6 @@
 #include "terlib.h"
+#include "pin.h"
+#include "color.h"
 
 #include <Arduino.h>
 #include <stdint.h>     // uint8_t
@@ -7,23 +9,24 @@
 #include <stdlib.h>
 #include <SoftwareSerial.h> // RX TX
 
-#define DEBUG_input true
+#define DEBUG_input false
 #define DEBUG true
 
 // DEFINE ------------------------------------------------------
 #define TICK_RATE 200        // milliseconds, temps de 1 frame (60fps = 16.6ms)
-SoftwareSerial terSerial(PIN_RX, PIN_TX); // RX, TX
+SoftwareSerial terserial(PIN_RX, PIN_TX); // RX, TX
 
 // FastLED
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
 #define CHIPSET         WS2812  // osef
 #define BRIGHTNESS      20  // luminosité réglable
 #define NUM_LEDS (MAT_WIDTH * MAT_HEIGHT)
-CRGB leds_plus_safety_pixel[ NUM_LEDS + 1];
-CRGB* const leds( leds_plus_safety_pixel + 1);
+CRGB leds_plus_safety_pixel[NUM_LEDS + 1];
+CRGB* const leds(leds_plus_safety_pixel + 1);
 
 
 // DECLARATION DE FONCTIONS ------------------------------------
+void button_setup(btn_t* A, btn_t* B, btn_t* U, btn_t* D, btn_t* L, btn_t* R);
 static uint8_t XY(uint8_t x, uint8_t y);    // static car la fonction est passée de uint16 à uint8. 9x9 = 81 on a pas besoin de 16 bits pour aller jusque là ; sauf que la fonction est déjà déclarée dans fastLED, donc la foutre en static la rend accessible seulement ici et pas de warning ^^
 uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
 void initMatrice(mat_t mat);
@@ -34,7 +37,7 @@ uint8_t readCartouche(void);    // fonction qui lit les 3 bits de cartouche
 void update(game_t* game, uint8_t* input);
 void render(game_t* game);
 void ledtoggle(void); // juste pour test ca sert un peu à rien ce truc
-void antirebond(uint8_t* data_input, btn_t* btn);
+void antirebond(uint8_t* data_input, btn_t* btn_t);
 void parse_input(uint8_t data, uint8_t* input_buffer, uint8_t* n);
 
 
@@ -65,12 +68,12 @@ uint8_t oppsinput = 0;
 uint8_t terinput = 0;
 uint8_t input_buffer[16] = {0};   // sert à stocker de multiples inputs avant le render d'une frame
 uint8_t input_counter = 0;
-btn_t A, B, LEFT, RIGHT, UP, DOWN;
+btn_t A, B, L, R, U, D;
 
 
 uint8_t id_random_own;
 uint8_t id_random_opps;
-uint8_t connected = 0;
+bool connected = false;
 // ID PIN cartouche
 uint8_t IDP = 255;  // valeur impossible à avoir avec 3 bits
 
@@ -86,55 +89,29 @@ void setup()
     // Setup pins
     pinMode(PIN_RX, INPUT);
     pinMode(PIN_TX, OUTPUT);
-    pinMode(PIN_A,     INPUT_PULLUP);
-    pinMode(PIN_B,     INPUT_PULLUP);
-    pinMode(PIN_UP,    INPUT_PULLUP);
-    pinMode(PIN_LEFT,  INPUT_PULLUP);
-    pinMode(PIN_DOWN,  INPUT_PULLUP);
-    pinMode(PIN_RIGHT, INPUT_PULLUP);
+    pinMode(PIN_A, INPUT_PULLUP);
+    pinMode(PIN_B, INPUT_PULLUP);
+    pinMode(PIN_U, INPUT_PULLUP);
+    pinMode(PIN_L, INPUT_PULLUP);
+    pinMode(PIN_D, INPUT_PULLUP);
+    pinMode(PIN_R, INPUT_PULLUP);
     pinMode(PIN_CARTOUCHE_0, INPUT); // surtout pas en INPUT_PULLUP, sinon quand on débranche la cartouche on voudrait 000 et on aurait 111
     pinMode(PIN_CARTOUCHE_1, INPUT);
     pinMode(PIN_CARTOUCHE_2, INPUT);
 
     // Boutons
-    A.prev_state = digitalRead(PIN_A);
-    A.pin = PIN_A;
-    A.bitshift = 0;
-    A.bin = INPUT_A;
+    button_setup(&A, &B, &U, &D, &L, &R);
 
-    B.prev_state = digitalRead(PIN_B);
-    B.pin = PIN_B;
-    B.bitshift = 1;
-    B.bin = INPUT_B;
+    #if DEBUG   
+        // Debug Arduino
+        pinMode(LED_BUILTIN, OUTPUT);
 
-    LEFT.prev_state = digitalRead(PIN_LEFT);
-    LEFT.pin = PIN_LEFT;
-    LEFT.bitshift = 2;
-    LEFT.bin = INPUT_LEFT;
-
-    RIGHT.prev_state = digitalRead(PIN_RIGHT);
-    RIGHT.pin = PIN_RIGHT;
-    RIGHT.bitshift = 3;
-    RIGHT.bin = INPUT_RIGHT;
-
-    UP.prev_state = digitalRead(PIN_UP);
-    UP.pin = PIN_UP;
-    UP.bitshift = 5;
-    UP.bin = INPUT_UP;
-    
-    DOWN.prev_state = digitalRead(PIN_DOWN);
-    DOWN.pin = PIN_DOWN;
-    DOWN.bitshift = 4;
-    DOWN.bin = INPUT_DOWN;
-
-    // Debug Arduino
-    pinMode(LED_BUILTIN, OUTPUT);
-
-    #if DEBUG
         Serial.begin(9600);
         Serial.println("Salut! (9600)");
-        delay(1500);
+        delay(500);
     #endif
+
+    terserial.begin(31250);
     // 16/31250 / 16 bit/s => 0.51 ms à trasmettre 2 octets
 }
 
@@ -171,84 +148,91 @@ void loop()
             #endif
 
             switch (IDP) {
-                case SNAKE:         tergame.current_game = SNAKE;
-                                    tergame.mode = SOLO;
-                                    tergame.state = RUN;
-                                    #if DEBUG
-                                        Serial.println("\tSNAKE");
-                                    #endif
-                                    break;
+                case SNAKE:         
+                    tergame.current_game = SNAKE;
+                    tergame.mode = SOLO;
+                    tergame.state = RUN;
+                    #if DEBUG
+                        Serial.println("\tSNAKE");
+                    #endif
+                    break;
 
-                case MEGAMORPION:   tergame.current_game = MEGAMORPION;
-                                    tergame.mode = TBS;
-                                    tergame.state = RUN;
-                                    //tergame = megamorpion2(tergame, INPUT_INIT);
-                                    #if DEBUG
-                                        Serial.println("\tMEGAMORPION");
-                                    #endif
-                                    break; 
+                case MEGAMORPION:  
+                    tergame.current_game = MEGAMORPION;
+                    tergame.mode = TBS;
+                    tergame.state = RUN;
+                    //tergame = megamorpion2(tergame, INPUT_INIT);
+                    #if DEBUG
+                        Serial.println("\tMEGAMORPION");
+                    #endif
+                    break; 
 
-                case FANORONA:      tergame.current_game = FANORONA;    
-                                    tergame.mode = TBS;
-                                    tergame.state = RUN;
-                                    #if DEBUG
-                                        Serial.println("\tFANORONA");
-                                    #endif
-                                    break;
+                case FANORONA:     
+                    tergame.current_game = FANORONA;    
+                    tergame.mode = TBS;
+                    tergame.state = RUN;
+                    #if DEBUG
+                        Serial.println("\tFANORONA");
+                    #endif
+                    break;
 
-                case TRON:          tergame.current_game = TRON;
-                                    tergame.mode = RT;
-                                    tergame.state = RUN;
-                                    #if DEBUG
-                                        Serial.println("\tTRON");
-                                    #endif
-                                    break;
+                case TRON:         
+                    tergame.current_game = TRON;
+                    tergame.mode = RT;
+                    tergame.state = RUN;
+                    #if DEBUG
+                        Serial.println("\tTRON");
+                    #endif
+                    break;
 
-                case SELECTOR:      tergame.current_game = SELECTOR;
-                                    tergame.mode = SOLO;
-                                    tergame.state = RUN;
-                                    #if DEBUG
-                                        Serial.println("\tSELECTOR");
-                                    #endif
-                                    break;
+                case SELECTOR:     
+                    tergame.current_game = SELECTOR;
+                    tergame.mode = SOLO;
+                    tergame.state = RUN;
+                    #if DEBUG
+                        Serial.println("\tSELECTOR");
+                    #endif
+                    break;
                 default: 
-                                    #if DEBUG
-                                        Serial.print("\n");
-                                    #endif
-                                    break;
+                    #if DEBUG
+                        Serial.print("\n");
+                    #endif
+                    break;
             }
         }
     }
 
-/*
     // Communication RX/TX
-    if ((tergame.mode != SOLO) && (!connected)) {
+    if ((tergame.mode != SOLO) && (connected == false)) {
         // Appairage
         // Envoit en boucle la data MAGIC_PAIRING jusqu'à ce que OWN reçoit ce meme signal de la part de OPPS
-        while (Serial.read() != MAGIC_PAIRING) {
-            Serial.write(MAGIC_PAIRING);
+        while (terserial.read() != MAGIC_PAIRING) {
+            #if DEBUG
+                Serial.println("[X] Connexion en cours... ");
+            #endif
+            terserial.write(MAGIC_PAIRING);
         }
-        connected = 1;
+        connected = true;
+        #if DEBUG
+            Serial.println("[X] Connexion réussie.");
+        #endif
 
+        /*
         // Qui commence ?
         if (tergame.mode == TBS) {      // il faut probablement des Serial.available() la dedans 
             id_random_own = rand();
-            Serial.write(id_random_own);
-            id_random_opps = Serial.read();
+            terserial.write(id_random_own);
+            id_random_opps = terserial.read();
 
             if (id_random_own > id_random_opps)
                 tergame.current_player = PLAYER1;
             else 
                 tergame.current_player = PLAYER2;
         }
+        */
     }
-*/
+
     // Début de la loop
-    #if DEBUG
-        //Serial.println("*** NOUVELLE LOOP ***");
-    #endif
-
-
     time_now = millis();
     if (time_now - time_last > TICK_RATE)
     {
@@ -256,7 +240,7 @@ void loop()
         // for(uint8_t n = 0; n <= input_counter; n++) {
             #if DEBUG
                 Serial.print("[!] UPDATE (");
-                Serial.print(n);
+                //Serial.print(n);
                 Serial.print(") : ");
             
                 switch (tergame.current_game) {
@@ -268,8 +252,8 @@ void loop()
                     case NONE:        Serial.println("NONE");       break;
                 }
             #endif
-            update(&tergame, input_buffer[n]);
-            input_buffer[n] = 0;    // vidage des couilles
+            update(&tergame, &terinput);
+            //input_buffer[n] = 0;    // vidage des couilles
         // }
         // input_counter = 0;
 
@@ -278,7 +262,7 @@ void loop()
         #endif
         render(&tergame);
         FastLED.setBrightness(BRIGHTNESS);
-        FastLED.show(); //permet d'allumer les leds
+        FastLED.show();
 
         time_last = time_now;
         terinput = 0;
@@ -289,10 +273,10 @@ void loop()
     if (terinput == 0) {
         antirebond(&data_input, &A);
         antirebond(&data_input, &B);
-        antirebond(&data_input, &LEFT);
-        antirebond(&data_input, &RIGHT);
-        antirebond(&data_input, &DOWN);
-        antirebond(&data_input, &UP);
+        antirebond(&data_input, &L);
+        antirebond(&data_input, &R);
+        antirebond(&data_input, &D);
+        antirebond(&data_input, &U);
         #if DEBUG_input
             Serial.print("data_input = 0b");
             Serial.println(data_input, BIN);
@@ -319,13 +303,13 @@ void loop()
         #if DEBUG_input
             Serial.print("[?] INPUT > ");
             switch(terinput) {
-                case INPUT_UP:      Serial.println("[^]");  break;
-                case INPUT_DOWN:    Serial.println("[v]");  break;
-                case INPUT_LEFT:    Serial.println("[<]");  break;
-                case INPUT_RIGHT:   Serial.println("[>]");  break;
-                case INPUT_A:       Serial.println("[A]");  break;
-                case INPUT_B:       Serial.println("[B]");  break;
-                default:            Serial.println("[ ]");  break;
+                case INPUT_U: Serial.println("[^]");  break;
+                case INPUT_D: Serial.println("[v]");  break;
+                case INPUT_L: Serial.println("[<]");  break;
+                case INPUT_R: Serial.println("[>]");  break;
+                case INPUT_A: Serial.println("[A]");  break;
+                case INPUT_B: Serial.println("[B]");  break;
+                default:      Serial.println("[ ]");  break;
             }
         #endif
     }
@@ -460,20 +444,19 @@ void render(game_t* game)
                 case COL_OPPS_CLAIR: leds[XY(i,j)] = OPPS_CLAIR_COLOR; break;
                 default: break;
             }
-             
         }
     }
 }
 
-void antirebond(uint8_t* data_input, btn_t *btn)
+void antirebond(uint8_t* data_input, btn_t *btn_t)
 {
-    btn->state = digitalRead(btn->pin);
-    if ((btn->state == LOW) && (btn->prev_state == HIGH)) { // detecte front montant 0->5V quand on lache le bouton
-        *data_input |= 1 << btn->bitshift;
+    btn_t->state = digitalRead(btn_t->pin);
+    if ((btn_t->state == LOW) && (btn_t->prev_state == HIGH)) { // detecte front montant 0->5V quand on lache le bouton
+        *data_input |= 1 << btn_t->bitshift;
         // ligne compliquée mais ça revient pour left par exemple à :
-        // data_input |= (digitalRead(PIN_LEFT) << 2);
+        // data_input |= (digitalRead(PIN_L) << 2);
     }
-    btn->prev_state = digitalRead(btn->pin);
+    btn_t->prev_state = digitalRead(btn_t->pin);
 }
 
 /* Cette fonction récupère un int8 d'input et le décompose en plusieurs input si plusieurs input ont été appuyés
@@ -490,12 +473,12 @@ void parse_input(uint8_t data, uint8_t* input_buffer, uint8_t* n)
         #endif
         
         switch (data & (1 << i)) {
-            case INPUT_A:     input_buffer[*n] = INPUT_A;     break;
-            case INPUT_B:     input_buffer[*n] = INPUT_A;     break;
-            case INPUT_LEFT:  input_buffer[*n] = INPUT_LEFT;  break;
-            case INPUT_RIGHT: input_buffer[*n] = INPUT_RIGHT; break;
-            case INPUT_UP:    input_buffer[*n] = INPUT_UP;    break;
-            case INPUT_DOWN:  input_buffer[*n] = INPUT_DOWN;  break;
+            case INPUT_A: input_buffer[*n] = INPUT_A; break;
+            case INPUT_B: input_buffer[*n] = INPUT_A; break;
+            case INPUT_L: input_buffer[*n] = INPUT_L; break;
+            case INPUT_R: input_buffer[*n] = INPUT_R; break;
+            case INPUT_U: input_buffer[*n] = INPUT_U; break;
+            case INPUT_D: input_buffer[*n] = INPUT_D; break;
             default: break;
         }
         ++*n;
@@ -506,5 +489,36 @@ void parse_input(uint8_t data, uint8_t* input_buffer, uint8_t* n)
     #endif
 }
 
+void button_setup(btn_t* A, btn_t* B, btn_t* U, btn_t* D, btn_t* L, btn_t* R)
+{
+    A->prev_state = digitalRead(PIN_A);
+    A->pin = PIN_A;
+    A->bitshift = 0;
+    A->bin = INPUT_A;
 
+    B->prev_state = digitalRead(PIN_B);
+    B->pin = PIN_B;
+    B->bitshift = 1;
+    B->bin = INPUT_B;
+
+    L->prev_state = digitalRead(PIN_L);
+    L->pin = PIN_L;
+    L->bitshift = 2;
+    L->bin = INPUT_L;
+
+    R->prev_state = digitalRead(PIN_R);
+    R->pin = PIN_R;
+    R->bitshift = 3;
+    R->bin = INPUT_R;
+
+    U->prev_state = digitalRead(PIN_U);
+    U->pin = PIN_U;
+    U->bitshift = 5;
+    U->bin = INPUT_U;
+
+    D->prev_state = digitalRead(PIN_D);
+    D->pin = PIN_D;
+    D->bitshift = 4;
+    D->bin = INPUT_D;
+}
 

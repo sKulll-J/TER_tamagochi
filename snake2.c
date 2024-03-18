@@ -3,6 +3,7 @@
 #include <Arduino.h> // millis
 
 #include "terlib.h"
+#include "color.h"
 
 #define FLAG_INIT   0x01
 #define FLAG_POMME  0x02
@@ -58,10 +59,10 @@ game_t snake(game_t game_data, uint8_t input)
     
 
     switch (input) { 
-        case INPUT_LEFT:  dir = 1; break;
-        case INPUT_RIGHT: dir = 3; break;
-        case INPUT_DOWN:  dir = 0; break;
-        case INPUT_UP:    dir = 2; break;
+        case INPUT_L:  dir = 1; break;
+        case INPUT_R: dir = 3; break;
+        case INPUT_D:  dir = 0; break;
+        case INPUT_U:    dir = 2; break;
         default: break; // pas besoin de A ni de B
     }
 

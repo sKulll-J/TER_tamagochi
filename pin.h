@@ -2,12 +2,12 @@
 #define PIN_H
 
 // PIN de boutons
-#define PIN_A      6 // 24
-#define PIN_B      7 // 25
-#define PIN_DOWN   2 // 20
-#define PIN_LEFT  14 // 27
-#define PIN_UP    15 // 26
-#define PIN_RIGHT 16 // 25
+#define PIN_A  6 // 24
+#define PIN_B  7 // 25
+#define PIN_D  2 // 20
+#define PIN_L 14 // 27
+#define PIN_U 15 // 26
+#define PIN_R 16 // 25
 
 // Fastled
 #define LED_DATA_PIN 3 // 21 

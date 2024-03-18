@@ -3,6 +3,7 @@
 #include <Arduino.h> // millis
 
 #include "terlib.h"
+#include "color.h"
 
 game_t tron(game_t game_data, uint8_t input)
 {

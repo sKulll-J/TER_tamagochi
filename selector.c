@@ -3,6 +3,7 @@
 #include <Arduino.h>// random()
 
 #include "terlib.h"
+#include "color.h"
 
 game_t selector(game_t game_data, uint8_t input)
 {
@@ -25,10 +26,10 @@ game_t selector(game_t game_data, uint8_t input)
         
         game_data.printmatrix[x][y] = game_data.previous_printmatrix[x][y];    // sert à effacer l'ancienne position du selecteur
         
-        if      (input == INPUT_LEFT)  { if (x > 0) x--; } 
-        else if (input == INPUT_RIGHT) { if (x < 8) x++; }
-        else if (input == INPUT_DOWN)  { if (y > 0) y--; }
-        else if (input == INPUT_UP)    { if (y < 8) y++; }
+        if      (input == INPUT_L)  { if (x > 0) x--; } 
+        else if (input == INPUT_R) { if (x < 8) x++; }
+        else if (input == INPUT_D)  { if (y > 0) y--; }
+        else if (input == INPUT_U)    { if (y < 8) y++; }
 
         #if DEBUG
             Serial.print("x = ");

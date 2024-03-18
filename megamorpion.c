@@ -5,6 +5,7 @@
 #include <Arduino.h>// random()
 
 #include "terlib.h"
+#include "color.h"
 
 #define INIT_VALUE 255
 
@@ -171,10 +172,10 @@ void calcul_coord(uint8_t *x, uint8_t *y, uint8_t megax, uint8_t megay, uint8_t 
 
 void croix_directionnelle(uint8_t input, uint8_t *x, uint8_t *y)
 {
-    if      (input == INPUT_LEFT)  { if (*x > 0) (*x)--; } 
-    else if (input == INPUT_RIGHT) { if (*x < 2) (*x)++; }
-    else if (input == INPUT_DOWN)  { if (*y > 0) (*y)--; }
-    else if (input == INPUT_UP)    { if (*y < 2) (*y)++; }
+    if      (input == INPUT_L)  { if (*x > 0) (*x)--; } 
+    else if (input == INPUT_R) { if (*x < 2) (*x)++; }
+    else if (input == INPUT_D)  { if (*y > 0) (*y)--; }
+    else if (input == INPUT_U)    { if (*y < 2) (*y)++; }
 }
 
 void joker_mode(uint8_t input, float (*xomatrix)[3][3][3], uint8_t megax, uint8_t megay)
