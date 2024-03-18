@@ -5,15 +5,14 @@
 #include <FastLED.h>    // bon cest logique
 #include <time.h>
 #include <stdlib.h>
-
-#define DEBUG_input true
-#define DEBUG true
+#include <SoftwareSerial.h> // RX TX
 
 #define DEBUG_input true
 #define DEBUG true
 
 // DEFINE ------------------------------------------------------
 #define TICK_RATE 200        // milliseconds, temps de 1 frame (60fps = 16.6ms)
+SoftwareSerial terSerial(PIN_RX, PIN_TX); // RX, TX
 
 // FastLED
 #define COLOR_ORDER     GRB // ordre des couleurs Green-Red-Blue
