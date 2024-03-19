@@ -96,7 +96,7 @@ game_t fanorona(game_t game_data, uint8_t input)
 
 // FONCTIONS ---------------------------------------------------
 /*  
-    Fonction pour initialiser le plateau : allume les leds de chaque joueur.
+    Fonction pour initialiser le plateau : pour allumer les leds de chaque joueur.
 */
 void plateau_init(uint8_t plateau[5][9])
 {
@@ -120,6 +120,7 @@ void plateau_init(uint8_t plateau[5][9])
 /*  
     Cette fonction scrute le plateau de jeu, vérifie les pions restants et détermine le vainqueur.
     Victoire par anihilation. 
+    Immobilisation non traitée ...
 */
 uint8_t check_win(uint8_t plateau[5][9])
 {   
@@ -198,6 +199,9 @@ void compute_vector(Vecteur deplacement, Pion pion_avant, Pion pion_apres)
 
 }
 
+/*  
+    Fonction pour valider un déplacement.
+*/
 bool move_pion(uint8_t plateau[5][9], Pion pion_depart, Pion pion_arrivee, Vecteur deplacement)
 {
     // Vérification si les coordonnées de départ et d'arrivée sont valides
