@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "terlib.h"
 
 #define OWN 1
@@ -24,12 +25,12 @@ typedef struct
 
 /*
     FONCTIONS NECESSAIRES
-        - initialiser le plateau de jeu : à faire
+        - initialiser le plateau de jeu : ok
         - vérifier victoire : ok
         - vérifier entourage d'un pion : ok
 
         - selectionner/déselectionner un pion : en cours
-            - confirmer déplacement : à faire
+            - déplacement : à tester
 
         - éliminations : en cours
             - calculer vecteur déplacement : ok
@@ -55,7 +56,7 @@ game_t fanorona(game_t game_data, uint8_t input)
             case INPUT_DOWN:  if (y > 0) y--; break;
             case INPUT_UP:    if (y < 5) y++; break;
             case INPUT_A: 
-                if (game_data.current_player == pion[y][x]) {   // si le joueur a selectionné un de ses pions
+                if (game_data.current_player == plateau[y][x]) {   // si le joueur a selectionné un de ses pions
                     flag_pion = SELECTED; 
                 } else {
                     // joue un petit "bip" (si on ajoute un système audio)
@@ -95,14 +96,28 @@ game_t fanorona(game_t game_data, uint8_t input)
 /*  
     Fonction pour initialiser le plateau : allume les leds de chaque joueur.
 */
-void plateau_init()
+void plateau_init(uint8_t plateau[5][9])
 {
+    for(int i = 0 ; i<5 ; i++)
+    {
+        for(int j = 0 ; j<9 ; j++)
+        {
+            if(i == 0 | i == 1) plateau[i][j] = 2 ;
+            else if(i == 3 | i == 4) plateau[i][j] = 1 ;
 
-
+            else if(i==3)
+            {
+                if(j==0|j==2|j==5|j==7) plateau[i][j] = 2 ;
+                if(j==1|j==3|j==6|j==8) plateau[i][j] = 1 ;
+            }
+            else plateau[i][j] = 0 ;
+        }
+    }
 }
 
 /*  
     Cette fonction scrute le plateau de jeu, vérifie les pions restants et détermine le vainqueur.
+    Victoire par anihilation. 
 */
 uint8_t check_win(uint8_t plateau[5][9])
 {   
@@ -113,8 +128,8 @@ uint8_t check_win(uint8_t plateau[5][9])
     {
         for(int j = 0 ; j<9 ; j++)
         {
-            if (pion[i][j] == 1)    pion_J1 = 1 ;
-            else if (pion[i][j] == 2)    pion_J2 = 1 ;
+            if      (plateau[i][j] == 1)    pion_J1 = 1 ;
+            else if (plateau[i][j] == 2)    pion_J2 = 1 ;
         }
     }
 
@@ -171,23 +186,59 @@ void check_entourage(uint8_t plateau[5][9], uint8_t entourage[5][5], Pion pion)
 }
 
 /*  
-    Cette fonction calcule le vecteur déplacement du pion joué.
+    Cette fonction calcule un vecteur déplacement.
 */
-Vecteur compute_vector(Pion pion_avant, Pion pion_apres)
+void compute_vector(Vecteur deplacement, Pion pion_avant, Pion pion_apres)
 {
-    Vecteur deplacement;
-
     // Calcul des composantes du vecteur de déplacement
     deplacement.dx = pion_apres.x - pion_avant.x;
     deplacement.dy = pion_apres.y - pion_avant.y;
 
-    return deplacement;
 }
+
+bool move_pion(uint8_t plateau[5][9], Pion pion_depart, Pion pion_arrivee, Vecteur deplacement)
+{
+    // Vérification si les coordonnées de départ et d'arrivée sont valides
+    if ( pion_depart.x < 0 || pion_depart.x >= 5  || pion_depart.y < 0  || pion_depart.y >= 9 ||
+        pion_arrivee.x < 0 || pion_arrivee.x >= 5 || pion_arrivee.y < 0 || pion_arrivee.y >= 9   ) 
+    {
+        return false; // Déplacement invalide
+    }
+
+    // Vérification si la case d'arrivée est vide
+    if (plateau[pion_arrivee.x][pion_arrivee.y] != 0) 
+    {
+        return false; // Déplacement invalide - case occupée
+    }
+
+    // Calcul du vecteur de déplacement
+    compute_vector(deplacement, pion_depart, pion_arrivee);
+
+    // Vérification du mouvement
+    if ((deplacement.dx == 1 || deplacement.dx == -1 || deplacement.dx == 0) &&
+        (deplacement.dy == 1 || deplacement.dy == -1 || deplacement.dy == 0)) 
+    {
+        // Déplacement autorisé, maj du plateau
+        plateau[pion_arrivee.x][pion_arrivee.y] = plateau[pion_depart.x][pion_depart.y];
+        plateau[pion_depart.x][pion_depart.y] = 0; // Vide la case de départ
+
+        return true ;
+    }
+    else 
+    {
+        return false; // Déplacement invalide
+    }
+}
+
+
 
 /*
     Fonction pour gérer les éliminations
 */
-void kill(uint8_t plateau[5][9], uint8_t entourage[5][5], Vecteur deplacement, Pion pion_now)
+void kill(uint8_t plateau[5][9], uint8_t entourage[5][5], Vecteur deplacement, Pion pion_depart)
 {
+    
+    // aspirations
 
+    // percussions
 }
