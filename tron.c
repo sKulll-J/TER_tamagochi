@@ -68,6 +68,16 @@ game_t tron(game_t game_data, uint8_t input)
     static int idx=0;
 
 
+    
+
+    // Clear screen
+    for (uint8_t i=0; i<9; i++) {
+        for (uint8_t j=0; j<9; j++) {   
+            game_data.printmatrix[i][j] = COL_NOIR;
+        }
+    }
+
+    //start flag
     if(flags==0x08)
     {
         for(int i=0;i<size_P1; i++)
@@ -79,13 +89,6 @@ game_t tron(game_t game_data, uint8_t input)
             bodypos2[i] = pos_2;
         }
         setBitVal(&flags, FLAGp_START, 0); 
-    }
-
-    // Clear screen
-    for (uint8_t i=0; i<9; i++) {
-        for (uint8_t j=0; j<9; j++) {   
-            game_data.printmatrix[i][j] = COL_NOIR;
-        }
     }
 
     if(game_data.current_player==PLAYER1) //patch les mauvaises récéptions
@@ -168,19 +171,36 @@ game_t tron(game_t game_data, uint8_t input)
         }
 
         //Detect end of game
-        if(checkEndGame(bodypos1,size_P1, bodypos2,size_P2)>0)
+        uint8_t result = checkEndGame(bodypos1,size_P1, bodypos2,size_P2); 
+        if(result>0)
         {
-           game_data.state=STOP; 
+            game_data.state=STOP; 
+            if(result == 1)
+                game_data.winlose = WIN;
+            if(result == 2)
+                game_data.winlose = LOSE;
+
+            //reset all variables
+            flags=0x08;
+            pos_1 = 0x34;
+            pos_2 = 0x54; 
+            prepos_1 = 0x34;
+            prepos_2 = 0x54; 
+            flags =0x08;
+            pastTime = 0;
+            loopDelay = SPD_STRT;
+            iteration_del = 0; 
+            dir_P1 = 0 ;
+            dir_P2 = 0 ;
+             count_01 = 0;
+            count_input1 = 0;
+            saved_input1 = 0;
+            count_02 = 0;
+            count_input2 = 0;
+            saved_input2 = 0;
         }
         
-        if(game_data.state==STOP)
-        {
-            for (uint8_t i=0; i<9; i++) {
-                for (uint8_t j=0; j<9; j++) {   
-                    game_data.printmatrix[i][j] = COL_OPPS;
-                }
-            }
-        }
+        
         
     }
 
@@ -197,7 +217,25 @@ game_t tron(game_t game_data, uint8_t input)
     }
     game_data.printmatrix[(bodypos2[0]&0xF0)>>4][bodypos2[0]&0x0F] = COL_OPPS;
     
-
+    if(game_data.state==STOP)
+    {
+        if(game_data.winlose==WIN)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    game_data.printmatrix[i][j] = COL_OWN;
+                }
+            }
+        }
+        if(game_data.winlose==LOSE)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    game_data.printmatrix[i][j] = COL_OPPS;
+                }
+            }
+        }
+    }
 
     return game_data;
 }

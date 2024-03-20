@@ -117,8 +117,6 @@ void setup()
 
 void loop()
 {
-    
-
     tergame.game_time = millis();//set actual time to game time
     
     #if DEBUG
@@ -138,7 +136,7 @@ void loop()
 
     // Choix du jeu
     if ((7-readCartouche()) != IDP) { // permet de réinit la console si on enleve la cartouche (feature demandée par erwann)
-        while (tergame.current_game == NONE)
+        //while (tergame.current_game == NONE)
         {
             /* Ici on utilise les pins de cartouche pour écrire un mot binaire de 3 bits en faisant un CC avec la broche +5V
             Il faut penser à bitshift sinon on overwrite le premier bit
@@ -276,7 +274,24 @@ void loop()
         #if DEBUG
             Serial.print("-----------STOP GAME-----------\n");
         #endif
-        clearscr();
+        //clearscr();
+        if(tergame.winlose==WIN)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    leds[XY(i,j)]=CRGB::Red;
+                }
+            }
+        }        
+        if(tergame.winlose==LOSE)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    leds[XY(i,j)]=CRGB::White;
+                }
+            }
+        }
+        FastLED.show();
         tergame.current_game = NONE;
     }
 
