@@ -59,9 +59,9 @@
 
 // couleur réelle à changer selon quelle console on flashe
 #define OWN_COLOR        CRGB(0, 255, 0)
-#define OWN_CLAIR_COLOR  CRGB(100, 255, 100) // rouge clair
+#define OWN_CLAIR_COLOR  CRGB(0, 30, 0) // rouge clair
 #define OPPS_COLOR       CRGB(0, 0, 255)
-#define OPPS_CLAIR_COLOR CRGB(100, 100, 255) // bleu clair
+#define OPPS_CLAIR_COLOR CRGB(0, 0, 30) // bleu clair
 
 
 // Communication
@@ -113,7 +113,7 @@ extern "C" {
     game_t snake(game_t game, uint8_t input);
     game_t tron(game_t game, uint8_t input);
     game_t fanorona(game_t game, uint8_t input);
-
+ 
     uint8_t readinput(void);
 #ifdef __cplusplus
 }

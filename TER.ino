@@ -117,12 +117,14 @@ void setup()
 
 void loop()
 {
-    //#if DEBUG
-        Serial.print("\n*** NOUVELLE LOOP ***\n");
-    //#endif
-    tergame.game_time = millis();//set actual time to game time
+    
 
-    Serial.println(tergame.game_time);
+    tergame.game_time = millis();//set actual time to game time
+    
+    #if DEBUG
+        Serial.print("\n*** NOUVELLE LOOP ***\n");
+        Serial.println(tergame.game_time);
+    #endif
 
     /*  Séquence de la gameloop:
         1. choix du jeu
@@ -215,7 +217,7 @@ void loop()
         if (tergame.current_player == PLAYER1) {       // à mon tour de jouer
                 tergame.current_player = PLAYER2;
                 terinput = readinput();
-                Serial.write(terinput);
+                Serial.print(terinput);
                 //? il manque l'envoit de la donnée
             } 
         else if (tergame.current_player == PLAYER2) {  // au tour de l'adversaire - la condition en commentaire économise 2 octets
@@ -230,10 +232,7 @@ void loop()
         }
     }
     
-        Serial.println(terinput, BIN);
 
-        Serial.print("PLAYER");
-        Serial.println(tergame.current_player);
     #if DEBUG
         Serial.print("Input : ");
         Serial.print(terinput, BIN);

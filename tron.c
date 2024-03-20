@@ -11,16 +11,25 @@
 #define flagP1 0x01
 #define flagP2 0x02
 #define flagTime 0x04
+#define FLAGp_START 3 // position du flag de start
+
+#define CHANGE_DEL_MAX 20000 //temps max avant que la vitesse augmente : 1000= 1min
+#define SPD_MIN 50 //vitesse minimum
+#define SPD_STRT 170 //vitesse de départ
 
 void newPos(uint8_t * pos, uint8_t * dir, uint8_t input);
-void changeBodyPos(uint8_t bodyPos[40], uint8_t size);
+void changeBodyPos(uint8_t *_bodyPos, uint8_t _size);
 uint8_t getBitVal(uint8_t mot , uint8_t bit_position); //récupere la valeur d'un bit dans un mot
+uint8_t checkEndGame(uint8_t *_bodyPos1,uint8_t sizeP1, uint8_t *_bodyPos2,uint8_t sizeP2); //vérifie si un joueur a perdu (ou les deux)
+game_t endGame(game_t game_data, uint8_t res); //set l'etat de game_data lors de la fin du jeu
 
+/*
 typedef struct Node {
     uint8_t pos;           // Donnée du nœud
     struct Node* next;  // Pointeur vers le prochain nœud
     struct Node* prev;  // Pointeur vers le prochain nœud
 } Node;
+
 
 Node* newNode(uint8_t pos) {
     Node* newNode = (Node*)malloc(sizeof(Node)); // Allocation de mémoire pour le nouveau nœud
@@ -29,7 +38,7 @@ Node* newNode(uint8_t pos) {
     newNode->next = NULL; // Initialisation du pointeur vers le prochain nœud à NULL
     newNode->prev = NULL; // Initialisation du pointeur vers le précédent nœud à NULL
     return newNode;
-}
+}*/
 
 game_t tron(game_t game_data, uint8_t input) 
 {
@@ -39,12 +48,15 @@ game_t tron(game_t game_data, uint8_t input)
     static uint8_t prepos_2 = 0x54; 
     static uint8_t flags =0x08;
     static unsigned long pastTime = 0;
-    static uint16_t loopDelay = 250;
+    static uint16_t loopDelay = SPD_STRT;
+    static uint8_t iteration_del = 0; //compte ne nombre de deplacement avant d'augmenter la vitesse
 
     static uint8_t dir_P1 = 0 ;
     static uint8_t dir_P2 = 0 ;
-    static uint8_t size_P1 = 1;
-    static uint8_t size_P2 = 1;
+    static uint8_t size_P1 = 8;
+    static uint8_t size_P2 = 8;
+    static uint8_t bodypos1[8];
+    static uint8_t bodypos2[8];
 
     static uint8_t count_01 = 0;
     static uint8_t count_input1 = 0;
@@ -53,38 +65,28 @@ game_t tron(game_t game_data, uint8_t input)
     static uint8_t count_input2 = 0;
     static uint8_t saved_input2 = 0;
 
-    static Node* head1;
-    static Node* head2;
+    static int idx=0;
 
+
+    if(flags==0x08)
+    {
+        for(int i=0;i<size_P1; i++)
+        {
+            bodypos1[i] = pos_1;
+        }
+        for(int i=0;i<size_P2; i++)
+        {
+            bodypos2[i] = pos_2;
+        }
+        setBitVal(&flags, FLAGp_START, 0); 
+    }
+
+    // Clear screen
     for (uint8_t i=0; i<9; i++) {
         for (uint8_t j=0; j<9; j++) {   
             game_data.printmatrix[i][j] = COL_NOIR;
         }
     }
-
-    /*if(getBitVal(flags, 3)) //flag d'init
-    {
-        head1 = newNode(pos_1);
-        head2 = newNode(pos_2);
-        Node* temp1 = head1;
-        Node* temp2 = head2;
-        for(int i=0; i<size_P1; i++)
-        {
-            Node* tempTemp1 = newNode(pos_1);
-            temp1->next = tempTemp1;
-            tempTemp1->prev = temp1;
-            temp1 = tempTemp1;
-
-            Node* tempTemp2 = newNode(pos_1);
-            temp2->next = tempTemp2;
-            tempTemp2->prev = temp2;
-            temp2 = tempTemp2;
-
-            game_data.printmatrix[0][0] = COL_OPPS;
-        }
-
-        setBitVal(&flags, 3, 0);
-    }*/
 
     if(game_data.current_player==PLAYER1) //patch les mauvaises récéptions
     {
@@ -92,8 +94,6 @@ game_t tron(game_t game_data, uint8_t input)
         {
             saved_input1 = input;
             count_input1 ++;
-            
-            game_data.printmatrix[0][9] = COL_OWN_CLAIR;
         }
         else
         {
@@ -117,34 +117,16 @@ game_t tron(game_t game_data, uint8_t input)
     if((game_data.game_time-pastTime>loopDelay) && (getBitVal(flags, 2)==0))
     {
         setBitVal(&flags, 2, 1);
-        game_data.printmatrix[0][0] = COL_BLANC;
-
-
-        
-        //setBitVal(&flags, 0, 0);
-        //setBitVal(&flags, 1, 1);
-        //pastTime=game_data.game_time;
     }
 
-    if(game_data.current_player==PLAYER1 && (getBitVal(flags, 2)==1) && (getBitVal(flags, 0)==0))
-    {
-        if(count_input1>1)
-        {
-            
-            game_data.printmatrix[0][1] = COL_BLANC; 
-        }
-        
+    if(game_data.current_player==PLAYER1 && (getBitVal(flags, 2)==1) && (getBitVal(flags, 0)==0)) //déplacement du player1
+    {        
         newPos(&prepos_1,&dir_P1, saved_input1);
 
         setBitVal(&flags, 0,1);
     }
-    else if(game_data.current_player==PLAYER2 && (getBitVal(flags, 2)==1)  && (getBitVal(flags, 1)==0))
+    else if(game_data.current_player==PLAYER2 && (getBitVal(flags, 2)==1)  && (getBitVal(flags, 1)==0)) //deplacement du player2
     {
-        if(count_input2>1)
-        {
-            game_data.printmatrix[0][2] = COL_BLANC;
-        }
-        
         newPos(&prepos_2,&dir_P2, saved_input2);
 
         setBitVal(&flags, 1,1); 
@@ -152,64 +134,68 @@ game_t tron(game_t game_data, uint8_t input)
 
     if((getBitVal(flags, 0)==1) && (getBitVal(flags, 1)==1)) //si les deux joueurs on bougés
     {
+        // Remove bits
         setBitVal(&flags, 0,0); 
         setBitVal(&flags, 1,0);
         setBitVal(&flags, 2,0);
        
-        pastTime = game_data.game_time;
+        pastTime = game_data.game_time; //met le temps au temps actuel
 
+        //Set la position a la position temporaire
+        //prepos sont set le temps que les deux joueurs aient bougées => synchro
         pos_1 = prepos_1;
         pos_2 = prepos_2;
 
-        //head1->pos = pos_1;
-        //head2->pos = pos_2;
-
+        //
         count_01 = 0;
         count_02 = 0;
         count_input1 = 0;
         count_input2 = 0;
 
-        game_data.printmatrix[1][0] = COL_OPPS;
-    }
+        // Change body position
+        changeBodyPos(&bodypos1, size_P1);
+        changeBodyPos(&bodypos2, size_P2);
+        bodypos1[0]=pos_1;
+        bodypos2[0]=pos_2;
 
-    /*for(int i =0; i<size_P1; i++)
-    {
-        game_data.printmatrix[body_P1[i]>>4][body_P1[i]&0x0F] = COL_OWN;
-    }
-    for(int i =0; i<size_P2; i++)
-    {
-        game_data.printmatrix[body_P2[i]>>4][body_P2[i]&0x0F] = COL_OPPS;
-    }*/
+        //Change speed
+        iteration_del++; //augmente la vitesse toutes les minutes
+        if(iteration_del*(uint16_t)loopDelay>CHANGE_DEL_MAX)
+        {
+            iteration_del=0;
+            if(loopDelay>SPD_MIN) //vitesse minimum
+                loopDelay-=2;
+        }
 
-    game_data.printmatrix[pos_1>>4][pos_1&0x0F] = COL_OWN;
-    game_data.printmatrix[pos_2>>4][pos_2&0x0F] = COL_OPPS;
-
-    // DEBUG avec matrice 
-    /*if(getBitVal(flags, 0)==1) //si les deux joueurs on bougés
-    {
-        game_data.printmatrix[1][1] = COL_OPPS;
-    }
-    else{
-        game_data.printmatrix[2][1] = COL_OPPS;
+        //Detect end of game
+        if(checkEndGame(bodypos1,size_P1, bodypos2,size_P2)>0)
+        {
+           game_data.state=STOP; 
+        }
+        
+        if(game_data.state==STOP)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    game_data.printmatrix[i][j] = COL_OPPS;
+                }
+            }
+        }
         
     }
-    if(getBitVal(flags, 1)==1) //si les deux joueurs on bougés
-    {
-        game_data.printmatrix[1][2] = COL_OWN;
-    }
-    else{
-        game_data.printmatrix[2][2] = COL_OWN;
-        
-    }
-    if(getBitVal(flags, 2)==1) //si les deux joueurs on bougés
-    {
-        game_data.printmatrix[1][0] = COL_BLANC;
-    }
-    else{
-        game_data.printmatrix[2][0] = COL_BLANC;
-        
-    }*/
 
+    //--Affichage
+    for(idx=1;idx<size_P1; idx++)
+    {
+        game_data.printmatrix[(bodypos1[idx]&0xF0)>>4][bodypos1[idx]&0x0F] = COL_OWN_CLAIR;
+    }
+    game_data.printmatrix[(bodypos1[0]&0xF0)>>4][bodypos1[0]&0x0F] = COL_OWN;
+
+    for(idx=1;idx<size_P2; idx++)
+    {
+        game_data.printmatrix[(bodypos2[idx]&0xF0)>>4][bodypos2[idx]&0x0F] = COL_OPPS_CLAIR;
+    }
+    game_data.printmatrix[(bodypos2[0]&0xF0)>>4][bodypos2[0]&0x0F] = COL_OPPS;
     
 
 
@@ -253,12 +239,50 @@ void newPos(uint8_t * pos, uint8_t* dir, uint8_t input)
     (*pos) = y+(x<<4); 
 }
 
-void changeBodyPos(uint8_t bodyPos[40], uint8_t size)
+void changeBodyPos(uint8_t *_bodyPos, uint8_t _size)
 {
-    for(int i=size; i>1; i--)
-    {
-        bodyPos[i]=bodyPos[i-1];
+    for (int i=0; i<_size-1; i++) {
+            _bodyPos[_size-1-i] = _bodyPos[_size-2-i];
     }
+}
+
+uint8_t checkEndGame(uint8_t *_bodyPos1,uint8_t sizeP1, uint8_t *_bodyPos2,uint8_t sizeP2)
+{
+    uint8_t res = 0; //res=0 : nothing / res=1 : P1 win / res=2 : P2 win / res=3 : No winner
+    for(int i=0; i<sizeP1; i++)
+    {
+        if(_bodyPos2[0]==_bodyPos1[i])
+            res+=1;
+    } 
+
+    for(int i=0; i<sizeP2; i++)
+    {
+        if(_bodyPos1[0]==_bodyPos2[i])
+            res+=2;
+    } 
+
+    return res;
+}
+
+game_t endGame(game_t game_data, uint8_t res)
+{/*
+    if(res==1)
+    {
+        game_data.state = RUN;
+        game_data.winlose = LOSE;
+
+    }
+    if(res==2)
+    {
+        game_data.state = STOP;
+        game_data.winlose = WIN;
+
+    }
+    if(res==3)
+    {
+        game_data.state = STOP;
+    }*/
+    return game_data;
 }
 
 uint8_t getBitVal(uint8_t mot , uint8_t bit_position)

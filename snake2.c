@@ -25,7 +25,7 @@ game_t snake(game_t game_data, uint8_t input)
     static uint8_t dir = 0x03;              // un bit pour VERTICAL/HORIZONTAL un bit pour +/-
     static unsigned long pasttime = 1000.0;
     static uint8_t snakesize = 3;
-    static uint8_t bodypos[30];
+    static uint8_t bodypos[18];
 
     switch (flag) {
         case FLAG_INIT:      //initialise le corps du snake
