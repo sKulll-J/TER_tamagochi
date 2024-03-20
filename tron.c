@@ -42,17 +42,17 @@ Node* newNode(uint8_t pos) {
 
 game_t tron(game_t game_data, uint8_t input) 
 {
-    static uint8_t pos_1 = 0x34;
-    static uint8_t pos_2 = 0x54; 
-    static uint8_t prepos_1 = 0x34;
-    static uint8_t prepos_2 = 0x54; 
+    static uint8_t pos_1 = 0x30;
+    static uint8_t pos_2 = 0x58; 
+    static uint8_t prepos_1 = 0x30;
+    static uint8_t prepos_2 = 0x58; 
     static uint8_t flags =0x08;
     static unsigned long pastTime = 0;
     static uint16_t loopDelay = SPD_STRT;
     static uint8_t iteration_del = 0; //compte ne nombre de deplacement avant d'augmenter la vitesse
 
     static uint8_t dir_P1 = 0 ;
-    static uint8_t dir_P2 = 0 ;
+    static uint8_t dir_P2 = 1 ;
     static uint8_t size_P1 = 8;
     static uint8_t size_P2 = 8;
     static uint8_t bodypos1[8];
