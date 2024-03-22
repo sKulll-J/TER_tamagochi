@@ -3,19 +3,25 @@
 
 #include "terlib.h"
 
-#define UP 4
+#define UP 4 //valeur d'Input corresopondant a la touche
 #define DOWN  16 
 #define RIGHT 8
 #define LEFT 2
 
-#define flagP1 0x01
-#define flagP2 0x02
-#define flagTime 0x04
 #define FLAGp_START 3 // position du flag de start
+#define FLAGp_TIMEDONE 2 // position du flag de delai avant une réactualisation
+#define FLAGp_P2 1 // position du flag qui determine si le joueur 1 a joué
+#define FLAGp_P1 0 // position du flag qui determine si le joueur 2 a joué
 
 #define CHANGE_DEL_MAX 20000 //temps max avant que la vitesse augmente : 1000= 1min
 #define SPD_MIN 50 //vitesse minimum
 #define SPD_STRT 170 //vitesse de départ
+
+#define INIT_POSP1 0x34 //position de départ du P1
+#define INIT_POSP2 0x58 //position de départ du P2
+#define INIT_DIRP1 0  //initialisation de l'orientation du P1
+#define INIT_DIRP2 1 //initialisation de l'orientation du P2
+#define INIT_FLAGS 0x08 // initialisation des flags
 
 void newPos(uint8_t * pos, uint8_t * dir, uint8_t input);
 void changeBodyPos(uint8_t *_bodyPos, uint8_t _size);
@@ -42,17 +48,17 @@ Node* newNode(uint8_t pos) {
 
 game_t tron(game_t game_data, uint8_t input) 
 {
-    static uint8_t pos_1 = 0x30;
-    static uint8_t pos_2 = 0x58; 
-    static uint8_t prepos_1 = 0x30;
-    static uint8_t prepos_2 = 0x58; 
-    static uint8_t flags =0x08;
+    static uint8_t pos_1 = INIT_POSP1;
+    static uint8_t pos_2 = INIT_POSP2; 
+    static uint8_t prepos_1 = INIT_POSP1;
+    static uint8_t prepos_2 = INIT_POSP2; 
+    static uint8_t flags = INIT_FLAGS; // garde tous les flags nécessaires dans la loop de jeux : 0b[0000 |flag de start|flag Joueurs ont joué|flag P2 a joué|flag P1 a joué]
     static unsigned long pastTime = 0;
     static uint16_t loopDelay = SPD_STRT;
     static uint8_t iteration_del = 0; //compte ne nombre de deplacement avant d'augmenter la vitesse
 
-    static uint8_t dir_P1 = 0 ;
-    static uint8_t dir_P2 = 1 ;
+    static uint8_t dir_P1 = INIT_DIRP1 ;
+    static uint8_t dir_P2 = INIT_DIRP2 ;
     static uint8_t size_P1 = 8;
     static uint8_t size_P2 = 8;
     static uint8_t bodypos1[8];
@@ -65,10 +71,7 @@ game_t tron(game_t game_data, uint8_t input)
     static uint8_t count_input2 = 0;
     static uint8_t saved_input2 = 0;
 
-    static int idx=0;
-
-
-    
+    static int idx=0;    
 
     // Clear screen
     for (uint8_t i=0; i<9; i++) {
@@ -78,7 +81,7 @@ game_t tron(game_t game_data, uint8_t input)
     }
 
     //start flag
-    if(flags==0x08)
+    if(getBitVal(flags, FLAGp_START)==1)
     {
         for(int i=0;i<size_P1; i++)
         {
@@ -117,25 +120,24 @@ game_t tron(game_t game_data, uint8_t input)
     }
     
 
-    if((game_data.game_time-pastTime>loopDelay) && (getBitVal(flags, 2)==0))
+    if((game_data.game_time-pastTime>loopDelay) && (getBitVal(flags, FLAGp_TIMEDONE)==0))
     {
-        setBitVal(&flags, 2, 1);
+        setBitVal(&flags, FLAGp_TIMEDONE, 1);
     }
 
-    if(game_data.current_player==PLAYER1 && (getBitVal(flags, 2)==1) && (getBitVal(flags, 0)==0)) //déplacement du player1
+    if(game_data.current_player==PLAYER1 && (getBitVal(flags, FLAGp_TIMEDONE)==1) && (getBitVal(flags, FLAGp_P1)==0)) //déplacement du player1
     {        
         newPos(&prepos_1,&dir_P1, saved_input1);
-
-        setBitVal(&flags, 0,1);
+        setBitVal(&flags, FLAGp_P1,1); //met a 1 le flag indiquant que le P1 a joué
     }
-    else if(game_data.current_player==PLAYER2 && (getBitVal(flags, 2)==1)  && (getBitVal(flags, 1)==0)) //deplacement du player2
+    else if(game_data.current_player==PLAYER2 && (getBitVal(flags, FLAGp_TIMEDONE)==1)  && (getBitVal(flags, FLAGp_P2)==0)) //deplacement du player2
     {
         newPos(&prepos_2,&dir_P2, saved_input2);
 
-        setBitVal(&flags, 1,1); 
+        setBitVal(&flags, FLAGp_P2,1); //met a 1 le flag indiquant que le P2 a joué
     }
 
-    if((getBitVal(flags, 0)==1) && (getBitVal(flags, 1)==1)) //si les deux joueurs on bougés
+    if((getBitVal(flags, FLAGp_P1)==1) && (getBitVal(flags, FLAGp_P2)==1)) //si les deux joueurs on bougés
     {
         // Remove bits
         setBitVal(&flags, 0,0); 
@@ -182,17 +184,17 @@ game_t tron(game_t game_data, uint8_t input)
 
             //reset all variables
             flags=0x08;
-            pos_1 = 0x34;
-            pos_2 = 0x54; 
-            prepos_1 = 0x34;
-            prepos_2 = 0x54; 
-            flags =0x08;
+            pos_1 = INIT_POSP1;
+            pos_2 = INIT_POSP2; 
+            prepos_1 = INIT_POSP1;
+            prepos_2 = INIT_POSP2; 
+            flags = INIT_FLAGS;
             pastTime = 0;
             loopDelay = SPD_STRT;
             iteration_del = 0; 
-            dir_P1 = 0 ;
-            dir_P2 = 0 ;
-             count_01 = 0;
+            dir_P1 = INIT_DIRP1 ;
+            dir_P2 = INIT_DIRP2 ;
+            count_01 = 0;
             count_input1 = 0;
             saved_input1 = 0;
             count_02 = 0;
