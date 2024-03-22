@@ -13,7 +13,7 @@
 
 typedef struct 
 {
-    uint8_t  x; // Coordonnée x du pion
+    uint8_t x; // Coordonnée x du pion
     uint8_t y; // Coordonnée y du pion
 } Pion;
 
@@ -34,11 +34,12 @@ typedef struct
         - selectionner/déselectionner un pion : en cours
             - déplacement : à tester
 
-        - éliminations : en cours
+        - éliminations : à tester
             - calculer vecteur déplacement : ok
-            - aspiration : à faire
-            - percussion : à faire
 
+    TO DO : 
+    - coder la gameloop 
+    - tests
 */
 
 game_t fanorona(game_t game_data, uint8_t input) 
@@ -237,14 +238,37 @@ bool move_pion(uint8_t plateau[5][9], Pion pion_depart, Pion pion_arrivee, Vecte
 }
 
 
-
 /*
-    Fonction pour gérer les éliminations
+    Fonction pour éliminations
 */
-void kill(uint8_t plateau[5][9], uint8_t entourage[5][5], Vecteur deplacement, Pion pion_depart)
-{
-    
-    // aspirations
+void kill(uint8_t plateau[5][9], uint8_t entourage[5][5], Pion pion_arrivee, Pion pion_depart, Vecteur deplacement)
+{   
+    int kil1_x = pion_arrivee.x + deplacement.dx ;
+    int kil1_y = pion_arrivee.y + deplacement.dy ;
 
-    // percussions
+    int kil2_x = pion_depart.x - deplacement.dx ;
+    int kil2_y = pion_depart.y - deplacement.dx ;
+    
+
+    while ( (plateau[kil1_x][kil1_y] =! 0) && (plateau[kil1_x][kil1_y] =! plateau[pion_arrivee.x][pion_arrivee.y] ) )
+    {
+        if ((kil1_x <5 && kil1_x >= 0) && (kil1_y <9 && kil1_y >=0))
+        {
+            plateau[kil1_x][kil1_y] = 0 ; // éliminations par percussion
+            kil1_x = kil1_x + deplacement.dx ;
+            kil1_y = kil1_y + deplacement.dy ;            
+        }
+
+    }
+
+    while ( (plateau[kil2_x][kil2_y] =! 0) && (plateau[kil2_x][kil2_y] =! plateau[pion_depart.x][pion_depart.y]) )
+    {    
+        if ((kil2_x <5 && kil2_x >= 0) && (kil2_y <9 && kil2_y >=0))
+        {
+            plateau[kil2_x][kil2_y] = 0 ; // éliminations par aspiration
+            kil2_x = kil2_x - deplacement.dx ;
+            kil2_y = kil2_y - deplacement.dy ;
+        }
+
+    } 
 }
