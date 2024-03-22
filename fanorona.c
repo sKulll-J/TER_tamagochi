@@ -162,7 +162,7 @@ void check_entourage(uint8_t plateau[5][9], uint8_t entourage[5][5], Pion pion)
 {
     // Parcours de l'entourage 5x5 autour du pion sélectionné
     for (int i = pion.x - 2, x_entourage = 0; i <= pion.x + 2; i++, x_entourage++) 
-    {
+    {   
         for (int j = pion.y - 2, y_entourage = 0; j <= pion.y + 2; j++, y_entourage++) 
         {
             // Vérification des limites du plateau
