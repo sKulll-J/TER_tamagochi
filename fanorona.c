@@ -6,7 +6,7 @@
 #include "color.h"
 
 #define OWN 1
-#define OPPS 2
+#define OPP 2
 #define NOT_SELECTED 0
 #define SELECTED 1
 
@@ -42,7 +42,7 @@ typedef struct
     - tests
 */
 
-game_t fanorona(game_t game_data, uint8_t input) 
+struct game_s fanorona(struct game_s game_data, uint8_t input) 
 {
     // DECLARATIONS --------------------------------------------
     static uint8_t plateau[5][9] = {0};    // grille de jeu
@@ -84,7 +84,7 @@ game_t fanorona(game_t game_data, uint8_t input)
         // affichage du curseur (blanc sur du vide)
         switch (plateau[y][x]) {
             case OWN:  game_data.printmatrix[y][x] = COL_OWN_CLAIR;  break;
-            case OPPS: game_data.printmatrix[y][x] = COL_OPPS_CLAIR; break;
+            case OPP:  game_data.printmatrix[y][x] = COL_OPP_CLAIR; break;
             case 0:    game_data.printmatrix[y][x] = COL_BLANC;      break;
                 //! pas sur du [y][x]
         }

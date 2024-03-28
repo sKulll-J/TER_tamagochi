@@ -93,7 +93,7 @@ typedef struct {
 extern "C" {
 #endif // __cplusplus
     struct game_s snake(struct game_s game_data, uint8_t input);
-    void megamorpion(struct game_s* game_data, uint8_t input);
+    struct game_s megamorpion(struct game_s game_data, uint8_t input);
     struct game_s fanorona(struct game_s game_data, uint8_t input);
     struct game_s tron(struct game_s game_data, uint8_t input);
     struct game_s selector(struct game_s game_data, uint8_t input); // pour debug

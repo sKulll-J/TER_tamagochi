@@ -2,6 +2,7 @@
 #include <stddef.h>
 
 #include "terlib.h"
+#include "color.h"
 
 #define UP 4 //valeur d'Input corresopondant a la touche
 #define DOWN  16 
@@ -27,7 +28,7 @@ void newPos(uint8_t * pos, uint8_t * dir, uint8_t input);
 void changeBodyPos(uint8_t *_bodyPos, uint8_t _size);
 uint8_t getBitVal(uint8_t mot , uint8_t bit_position); //récupere la valeur d'un bit dans un mot
 uint8_t checkEndGame(uint8_t *_bodyPos1,uint8_t sizeP1, uint8_t *_bodyPos2,uint8_t sizeP2); //vérifie si un joueur a perdu (ou les deux)
-game_t endGame(game_t game_data, uint8_t res); //set l'etat de game_data lors de la fin du jeu
+struct game_s endGame(struct game_s game_data, uint8_t res); //set l'etat de game_data lors de la fin du jeu
 
 /*
 typedef struct Node {
@@ -46,7 +47,7 @@ Node* newNode(uint8_t pos) {
     return newNode;
 }*/
 
-game_t tron(game_t game_data, uint8_t input) 
+struct game_s tron(struct game_s game_data, uint8_t input) 
 {
     static uint8_t pos_1 = INIT_POSP1;
     static uint8_t pos_2 = INIT_POSP2; 
@@ -174,9 +175,9 @@ game_t tron(game_t game_data, uint8_t input)
 
         //Detect end of game
         uint8_t result = checkEndGame(bodypos1,size_P1, bodypos2,size_P2); 
-        if(result>0)
+        if(result > 0)
         {
-            game_data.state=STOP; 
+            game_data.state = ter_STOP; 
             if(result == 1)
                 game_data.winlose = WIN;
             if(result == 2)
@@ -215,11 +216,11 @@ game_t tron(game_t game_data, uint8_t input)
 
     for(idx=1;idx<size_P2; idx++)
     {
-        game_data.printmatrix[(bodypos2[idx]&0xF0)>>4][bodypos2[idx]&0x0F] = COL_OPPS_CLAIR;
+        game_data.printmatrix[(bodypos2[idx]&0xF0)>>4][bodypos2[idx]&0x0F] = COL_OPP_CLAIR;
     }
-    game_data.printmatrix[(bodypos2[0]&0xF0)>>4][bodypos2[0]&0x0F] = COL_OPPS;
+    game_data.printmatrix[(bodypos2[0]&0xF0)>>4][bodypos2[0]&0x0F] = COL_OPP;
     
-    if(game_data.state==STOP)
+    if(game_data.state==ter_STOP)
     {
         if(game_data.winlose==WIN)
         {
@@ -233,7 +234,7 @@ game_t tron(game_t game_data, uint8_t input)
         {
             for (uint8_t i=0; i<9; i++) {
                 for (uint8_t j=0; j<9; j++) {   
-                    game_data.printmatrix[i][j] = COL_OPPS;
+                    game_data.printmatrix[i][j] = COL_OPP;
                 }
             }
         }
@@ -304,7 +305,7 @@ uint8_t checkEndGame(uint8_t *_bodyPos1,uint8_t sizeP1, uint8_t *_bodyPos2,uint8
     return res;
 }
 
-game_t endGame(game_t game_data, uint8_t res)
+struct game_s endGame(struct game_s game_data, uint8_t res)
 {/*
     if(res==1)
     {

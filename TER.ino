@@ -30,16 +30,11 @@ CRGB* const leds(leds_plus_safety_pixel + 1);
 void button_setup(btn_t* btn, uint8_t pin, uint8_t input_x);
 static uint8_t XY(uint8_t x, uint8_t y);    // static car la fonction est passée de uint16 à uint8. 9x9 = 81 on a pas besoin de 16 bits pour aller jusque là ; sauf que la fonction est déjà déclarée dans fastLED, donc la foutre en static la rend accessible seulement ici et pas de warning ^^
 uint8_t calcul_coordonnee(uint8_t x, uint8_t y);
-void initMatrice(mat_t mat);
-void refreshscr(void);
 void clearscr(void);
 void tererror(uint8_t*** led);
 uint8_t readCartouche(void);    // fonction qui lit les 3 bits de cartouche
 void update(struct game_s *game, uint8_t input);
 void render(struct game_s game);
-void ledtoggle(void); // juste pour test ca sert un peu à rien ce truc
-void antirebond(uint8_t* data_input, btn_t* btn_t);
-void parse_input(uint8_t data, uint8_t* input_buffer, uint8_t* n);
 
 // INIT GLOBAL -------------------------------------------------
 unsigned long time_now = 0;
@@ -462,21 +457,6 @@ void render(struct game_s game)
     }
     FastLED.show();
 }
-
-/* @brief Détecte un front montant pour les boutons
- * !deprecated
- */
-void antirebond(uint8_t* data_input, btn_t *btn_t)
-{
-    btn_t->state = digitalRead(btn_t->pin);
-    if ((btn_t->state == LOW) && (btn_t->prev_state == HIGH)) { // detecte front montant 0->5V quand on lache le bouton
-        //*data_input |= 1 << btn_t->bitshift;
-        // ligne compliquée mais ça revient pour left par exemple à :
-        // data_input |= (digitalRead(PIN_L) << 2);
-    }
-    btn_t->prev_state = digitalRead(btn_t->pin);
-}
-
 
 void button_setup(btn_t* btn, uint8_t pin, uint8_t input_x)
 {
