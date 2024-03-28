@@ -16,7 +16,7 @@
 #define DIR_PM 0x02 // bit selection plus, moins
 
 
-game_t snake(game_t game_data, uint8_t input)
+struct game_s snake(struct game_s game_data, uint8_t input)
 {
     // DECLARATIONS / INITIALISATIONS --------------------------
     // static ch_lst *corpschaine = NULL;    // init ma liste chainée
@@ -42,7 +42,7 @@ game_t snake(game_t game_data, uint8_t input)
 
         case FLAG_POMME:     //placement d'une nouvelle pomme
             pmpos = ((random() % 9 + 1) << 4) | (random() % 9 + 1);
-            game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPPS; 
+            game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPP; 
             flag &= 0xFD; //set bit de flag à 0
             break;
 
@@ -111,12 +111,12 @@ game_t snake(game_t game_data, uint8_t input)
 
 
         // Affiche la pomme
-        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPPS; 
+        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPP; 
 
         // Affiche toutes les part du corps
         //p=corpschaine;
         for (int i=0; i<snakesize; i++) {            
-            game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = COL_OPPS; 
+            game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = COL_OPP; 
             //p=p->prec;
         }
         

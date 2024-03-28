@@ -20,5 +20,6 @@
 // Communication
 #define PIN_RX 19 // 22
 #define PIN_TX 18 // 23
+#define PIN_RANDOM 24
 
 #endif

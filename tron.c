@@ -5,7 +5,7 @@
 #include "terlib.h"
 #include "color.h"
 
-game_t tron(game_t game_data, uint8_t input)
+struct game_s tron(struct game_s game_data, uint8_t input)
 {
     input++;
     game_data.printmatrix[5][3] = COL_BLANC;
