@@ -7,8 +7,8 @@
 #include <FastLED.h>        // bon cest logique
 #include <SoftwareSerial.h> // RX TX
 
-#define DEBUG        true
-#define DEBUG_input  true
+#define DEBUG        false
+#define DEBUG_input  false
 #define DEBUG_screen false
 
 // DEFINE ------------------------------------------------------
@@ -23,8 +23,6 @@ SoftwareSerial terserial(PIN_RX, PIN_TX); // RX, TX
 CRGB leds_plus_safety_pixel[NUM_LEDS + 1];
 CRGB* const leds(leds_plus_safety_pixel + 1);
 
-
-//SoftwareSerial commSerial(PIN_RX, PIN_TX);
 
 // DECLARATION DE FONCTIONS ------------------------------------
 void button_setup(btn_t* btn, uint8_t pin, uint8_t input_x);
@@ -258,12 +256,9 @@ void loop()
                     opp_input = terserial.read();
                     break;
                 }
-                delay(100);
             }
             #if DEBUG
                 Serial.print("[@] Oui allo jai entendu");
-            #endif
-            #if DEBUG
                 Serial.print("[+] INPUT (OPP): ");
                 switch(opp_input) {
                     case INPUT_U: Serial.println("[^]");  break;
@@ -284,31 +279,23 @@ void loop()
     // GAMELOOP SYNCHRONE
     if (tergame.mode == SYNCHRONE) {
         time_now = millis();
-        if ((time_now - time_last) > TICK_RATE)
-        {
-            update(&tergame, terinput);
+        if ((time_now - time_last) > TICK_RATE) {   // remplacer TICK par un truc genre tergame.tick pour qui'l soit modifiable (vitesse du Tron)
+            update(&tergame, own_input);
+            update(&tergame, opp_input);
             render(tergame);
             FastLED.setBrightness(BRIGHTNESS);
             FastLED.show();
 
             time_last = time_now;
-            terinput = 0;
+            own_input = 0;
+            opp_input = 0;
+        }
+    
+        // Reception serie de l'input adverse
+        if (tergame.mode != SOLO) {
+            opp_input = terserial.read();
         }
     }
-    
-    // Reception serie de l'input adverse
-    /*
-        if (tergame.mode != SOLO) {
-            if (tergame.mode == SYNCHRONE)
-                opp_input = terserial.read();
-            
-            // Attribution des inputs own/opp
-            if (tergame.current_player == PLAYER1)
-                terinput = own_input;
-            else if (tergame.current_player == PLAYER2)
-                terinput = opp_input;
-        }
-    */
     
     // Fin du jeu
     // TODO: faire blinker la matrice de la couleur du gagnant pour signifier la victoire (avec un delay entre le jeu et l'ecran de victoire)
