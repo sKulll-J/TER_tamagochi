@@ -26,7 +26,7 @@ struct game_s snake(struct game_s game_data, uint8_t input)
     static uint8_t dir = 0x03;              // un bit pour VERTICAL/HORIZONTAL un bit pour +/-
     static unsigned long pasttime = 1000.0;
     static uint8_t snakesize = 3;
-    static uint8_t bodypos[30];
+    static uint8_t bodypos[18];
 
     switch (flag) {
         case FLAG_INIT:      //initialise le corps du snake
@@ -67,7 +67,7 @@ struct game_s snake(struct game_s game_data, uint8_t input)
     }
 
     // exécute le main code lorsque'un certain temps s'est écoulé => lisibilité
-    if ((millis() - (unsigned long)pasttime) >= 10.0) {
+    if (true) {
         //ch_lst *p=corpschaine; //def la chaine a modifier
 
         //refresh position de la tete

@@ -76,6 +76,7 @@ struct game_s {
     bool winlose;                               // est-ce que PLAYER1 a gagné ou perdu
     uint8_t printmatrix[9][9];                  // matrice à traiter
     uint8_t previous_printmatrix[9][9];         // matrice à traiter du coup d'avant
+    unsigned long game_time;
 };
 
 typedef struct {

@@ -24,6 +24,8 @@ CRGB leds_plus_safety_pixel[NUM_LEDS + 1];
 CRGB* const leds(leds_plus_safety_pixel + 1);
 
 
+//SoftwareSerial commSerial(PIN_RX, PIN_TX);
+
 // DECLARATION DE FONCTIONS ------------------------------------
 void button_setup(btn_t* btn, uint8_t pin, uint8_t input_x);
 static uint8_t XY(uint8_t x, uint8_t y);    // static car la fonction est passée de uint16 à uint8. 9x9 = 81 on a pas besoin de 16 bits pour aller jusque là ; sauf que la fonction est déjà déclarée dans fastLED, donc la foutre en static la rend accessible seulement ici et pas de warning ^^
@@ -52,6 +54,7 @@ struct game_s tergame = {
     .winlose = 0,
     .printmatrix = {0},
     .previous_printmatrix = {0},
+    .game_time = 0,
 };
 
 mat_t termat = {
@@ -316,10 +319,26 @@ void loop()
     // TODO: faire blinker la matrice de la couleur du gagnant pour signifier la victoire (avec un delay entre le jeu et l'ecran de victoire)
     if (tergame.state == ter_STOP) {
         #if DEBUG
-            Serial.println("-----------STOP GAME-----------");
+            Serial.print("-----------STOP GAME-----------\n");
         #endif
-        
-        clearscr();
+        //clearscr();
+        if(tergame.winlose==WIN)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    leds[XY(i,j)]=CRGB::Red;
+                }
+            }
+        }        
+        if(tergame.winlose==LOSE)
+        {
+            for (uint8_t i=0; i<9; i++) {
+                for (uint8_t j=0; j<9; j++) {   
+                    leds[XY(i,j)]=CRGB::White;
+                }
+            }
+        }
+        FastLED.show();
         tergame.current_game = NONE;
     }
 
