@@ -7,13 +7,6 @@
 #include "terlib.h"
 #include "color.h"
 
-#define INIT_VALUE 255
-
-/* fonctions nécessaires 
-    - fonction jeu prend en paramètre tout les inputs et plus tard les inputs adverses
-        -> struct input_t owninput et input_t opp_input (ive got opp everywhere)
-    - gestion d'erreur si aucun adversaire n'est connecté (clignotement rouge ou whatnot)
-*/
 
 // DECLARATION DE FONCTIONS ------------------------------------
 static void color_matching(struct game_s game_data, uint8_t *col_current_own, uint8_t *col_current_clair_own, uint8_t *col_current_opp, uint8_t *col_current_clair_opp);
@@ -29,8 +22,7 @@ struct game_s megamorpion(struct game_s game_data, uint8_t input)
     
     /* Il faut tout mettre en static parce que la fonction est appelée genre 60 fois par seconde donc il faut pas réinitialiser des valeurs
      *      problème : on peut pas mettre des valeurs random dans un static (on veut un random pour commencer au pif qqpart dans la grille)
-     *      solution : on initialise une seule fois (avec INIT_VALUE qui vaut 255 donc impossible à obtenir avec un rand() % 3)
-     *                 puis on re-initialise avec des valeurs qu'on veut
+     *      solution : on appelle la fonction de jeu avec comme input le nombre généré aléatoirement pour connaitre qui commence en premier et on le %3 pour avoir une valeur de départ
      */
     static uint8_t x;                   // position x absolue 9x9
     static uint8_t y;                   // position y absolue 9x9
@@ -49,12 +41,11 @@ struct game_s megamorpion(struct game_s game_data, uint8_t input)
 
     // INITIALISATIONS -----------------------------------------
     if (flag_input == 1) {
-        // on a passé initalement en input tergame.current_player apreès avoir determiné qui commence. On l'utilise pour avoir du random dans la position, car si on faisait x=rand(3) par exemple on aurait des positions differentes sur chaque console
-        // transforme [9][9] en [3][3][3][3] je crois (au pire osef cest juste un peu de random)
+        // on a passé initalement en input tergame.current_player après avoir determiné qui commence. On l'utilise pour avoir du random dans la position, car si on faisait x=rand(3) par exemple on aurait des positions differentes sur chaque console
         input %= 9;
         megax = input % 3;
         megay = input % 3;
-        minix = (input - megax + 1) % 3;
+        minix = (input - megax + 1) % 3; // transforme [9][9] en [3][3][3][3] je crois (au pire osef cest juste un peu de random)
         miniy = (input - megay - 1) % 3; 
 
         #if DEBUG
@@ -94,7 +85,7 @@ struct game_s megamorpion(struct game_s game_data, uint8_t input)
     // GAME LOOP -----------------------------------------------
     color_matching(game_data, &col_current_own, &col_current_own_clair, &col_current_opp, &col_current_opp_clair);
 
-    if (input != INPUT_A) {  // magie noire (INPUT_A = 0b0000 0001 donc ça ne prend en compte que les directions et B)
+    if (input != INPUT_A) {  
         game_data.printmatrix[x][y] = game_data.previous_printmatrix[x][y];    // sert à effacer l'ancienne position du selecteur
         croix_directionnelle(input, &minix, &miniy);
         calcul_coord(&x, &y, megax, megay, minix, miniy);
@@ -181,9 +172,8 @@ struct game_s megamorpion(struct game_s game_data, uint8_t input)
 
 
 // FONCTIONS ---------------------------------------------------
-/* Cette fonction attribue la paire de couleur foncée/claire au tour actuel
- * ça sert à inverser les palettes quoi
- * ? j'en fait une fonction car ce bout de code apparait 2 fois : redondance = fonction dédiée
+/**
+ *  @brief Cette fonction attribue la paire de couleur foncée/claire au tour actuel (ça sert à inverser les palettes quoi)
  */
 void color_matching(struct game_s game_data, uint8_t *col_current_own, uint8_t *col_current_own_clair, uint8_t *col_current_opp, uint8_t *col_current_opp_clair)
 {
@@ -200,14 +190,22 @@ void color_matching(struct game_s game_data, uint8_t *col_current_own, uint8_t *
     }
 }
 
-/* Cette fonction transforme les coordonnées [3][3][3][3] en [9][9] */
+/** 
+ *  @brief Cette fonction transforme les coordonnées [3][3][3][3] en [9][9] 
+ *  @param x coordonnée x de la matrice 9x9
+ *  @param y coordonnée y de la matrice 9x9
+ *  @param megax coordonnée x dans la grande matrice 3x3
+ *  @param megay coordonnée y dans la grande matrice 3x3
+ *  @param minix coordonnée x dans la petite matrice 3x3
+ *  @param miniy coordonnée y dans la petite matrice 3x3
+ */
 void calcul_coord(uint8_t *x, uint8_t *y, uint8_t megax, uint8_t megay, uint8_t minix, uint8_t miniy)
 {
     *x = megax * 3 + minix;
     *y = megay * 3 + miniy;
 }
 
-void croix_directionnelle(uint8_t input, uint8_t *x, uint8_t *y)
+void croix_directionnelle(uint8_t input, uint8_t *x, uint8_t *y) // 17719
 {
     if (input == INPUT_L) { if (*x > 0) (*x)--; } 
     else if (input == INPUT_R) { if (*x < 2) (*x)++; }
@@ -223,14 +221,17 @@ void joker_mode(uint8_t input, float (*xomatrix)[3][3][3], uint8_t megax, uint8_
 }
 
 
-/* Cette fonction prend une matrice 3x3 et vérifie si l'un des deux joueurs a gagné.  
- * La vérification se fait en calculant la somme de chaque ligne, colonne et diagonale suivant le principe que:
- *   NaN + x = NaN => la lin/col/diag n'est pas complète
- *   0 + 0 + 0 = 0 => la lin/col/diag est gagnée par le J1
- *   1 + 1 + 1 = 3 => la lin/col/diag est gagnée par le J2
- *   1 + 0 + 1 = 2 => la lin/col/diag n'est gagnée par personne
+/** 
+ *  @brief Cette fonction prend une matrice 3x3 et vérifie si l'un des deux joueurs a gagné.  
+ *         La vérification se fait en calculant la somme de chaque ligne, colonne et diagonale suivant le principe que:
+ *              NaN + x = NaN => la lin/col/diag n'est pas complète
+ *              0 + 0 + 0 = 0 => la lin/col/diag est gagnée par le J1
+ *              1 + 1 + 1 = 3 => la lin/col/diag est gagnée par le J2
+ *              1 + 0 + 1 = 2 => la lin/col/diag n'est gagnée par personne
+ *  @param mat matrice 3x3
+ *
+ *  @todo rajouter les test isinf() pour detecter une megacase où ya une égalité
  */
-// TODO : rajouter les test isinf() pour detecter une megacase où ya une égalité
 uint8_t check_win(float (*mat)[3]) 
 {
     uint8_t CR;
@@ -259,10 +260,12 @@ uint8_t check_win(float (*mat)[3])
     return 0;   // revient à renvoyer "la somme de la ligne/colonne/diagonales est un NaN"
 }
 
-/* Cette fonction vérifie quelle est la valeur qu'elle reçoit
- * NaN => return 0
- * 0 => return J1
- * 3 => return J2
+/** 
+ *  @brief Cette fonction vérifie quelle est la valeur qu'elle reçoit
+ *          NaN => return 0
+ *          0 => return J1
+ *          3 => return J2
+ *  @param val 
  */
 uint8_t checksub(float val)
 {

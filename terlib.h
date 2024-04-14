@@ -69,7 +69,7 @@ typedef struct {  // Matrice de LED
 
 struct game_s {
     uint8_t current_game;                       // jeu actuel choisi 
-    uint8_t mode;                               // jeu solo/multi/synchrone
+    uint8_t mode;                               // jeu solo/sequentiel/synchrone
     struct game_s (*function)(struct game_s, uint8_t); // pointeur de fonction
     uint8_t current_player;                     // qui va jouer le coup suivant
     bool state;                                 // 0 en cours - 1 partie terminée
@@ -77,15 +77,8 @@ struct game_s {
     uint8_t printmatrix[9][9];                  // matrice à traiter
     uint8_t previous_printmatrix[9][9];         // matrice à traiter du coup d'avant
     unsigned long game_time;
+    uint8_t tickrate;                           // temps entre chaque frame
 };
-
-typedef struct {
-    uint8_t state;
-    uint8_t prev_state; // etat précédent du bouton - sert à detecter un front montant eviter les rebond etc
-    uint8_t pin;
-    uint8_t bitshift;
-    uint8_t bin;
-} btn_t;
 
 
 // DECLARATION DE FONCTIONS ------------------------------------

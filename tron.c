@@ -81,64 +81,51 @@ struct game_s tron(struct game_s game_data, uint8_t input)
         }
     }
 
-    //start flag
-    if(getBitVal(flags, FLAGp_START)==1)
-    {
-        for(int i=0;i<size_P1; i++)
-        {
+    // start flag
+    if (getBitVal(flags, FLAGp_START)==1) {
+        for (int i=0; i<size_P1; i++) {
             bodypos1[i] = pos_1;
         }
-        for(int i=0;i<size_P2; i++)
-        {
+        for(int i=0; i<size_P2; i++) {
             bodypos2[i] = pos_2;
         }
         setBitVal(&flags, FLAGp_START, 0); 
     }
 
-    if(game_data.current_player==PLAYER1) //patch les mauvaises récéptions
-    {
-        if(input != 0)
-        {
+    if (game_data.current_player==PLAYER1) { //patch les mauvaises récéptions
+        if (input != 0) {
             saved_input1 = input;
             count_input1 ++;
-        }
-        else
-        {
+        } else {
             count_01 ++;
         }
-    }
-    else
-    {
-       if(input != 0)
-        {
+    } else {
+        if (input != 0) {
             saved_input2 = input;
             count_input2 ++;
-        }
-        else
-        {
+        } else {
             count_02 ++;
         } 
     }
     
 
-    if((game_data.game_time-pastTime>loopDelay) && (getBitVal(flags, FLAGp_TIMEDONE)==0))
+    if ((game_data.game_time-pastTime>loopDelay) && (getBitVal(flags, FLAGp_TIMEDONE)==0))
     {
         setBitVal(&flags, FLAGp_TIMEDONE, 1);
     }
 
-    if(game_data.current_player==PLAYER1 && (getBitVal(flags, FLAGp_TIMEDONE)==1) && (getBitVal(flags, FLAGp_P1)==0)) //déplacement du player1
+    if (game_data.current_player==PLAYER1 && (getBitVal(flags, FLAGp_TIMEDONE)==1) && (getBitVal(flags, FLAGp_P1)==0)) //déplacement du player1
     {        
         newPos(&prepos_1,&dir_P1, saved_input1);
         setBitVal(&flags, FLAGp_P1,1); //met a 1 le flag indiquant que le P1 a joué
     }
-    else if(game_data.current_player==PLAYER2 && (getBitVal(flags, FLAGp_TIMEDONE)==1)  && (getBitVal(flags, FLAGp_P2)==0)) //deplacement du player2
+    else if (game_data.current_player==PLAYER2 && (getBitVal(flags, FLAGp_TIMEDONE)==1) && (getBitVal(flags, FLAGp_P2)==0)) //deplacement du player2
     {
         newPos(&prepos_2,&dir_P2, saved_input2);
-
         setBitVal(&flags, FLAGp_P2,1); //met a 1 le flag indiquant que le P2 a joué
     }
 
-    if((getBitVal(flags, FLAGp_P1)==1) && (getBitVal(flags, FLAGp_P2)==1)) //si les deux joueurs on bougés
+    if ((getBitVal(flags, FLAGp_P1)==1) && (getBitVal(flags, FLAGp_P2)==1)) //si les deux joueurs on bougés
     {
         // Remove bits
         setBitVal(&flags, 0,0); 

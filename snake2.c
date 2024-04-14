@@ -71,13 +71,13 @@ struct game_s snake(struct game_s game_data, uint8_t input)
         //ch_lst *p=corpschaine; //def la chaine a modifier
 
         //refresh position de la tete
-        headpos = ((headpos & FILTRE_X)                // explication
-                + (((1 - (dir & DIR_HV))               // ça sert à ...
-                * ((1) - 2 * ((dir & DIR_PM) >> 1)))   // là on fait 1 - la valeur du trou noir supermassif
-                << 4))                                 // on bitshift ta mere
-                | ((headpos & FILTRE_Y)                // PITIE ERWANN DONNE DES EXPLICATIONS
-                + ((dir & DIR_HV)                      // blabla bla
-                * ((1) - 2 * ((dir & DIR_PM) >> 1)))); // et voilà comment construire une bombe nucélaire
+        headpos = ((headpos & FILTRE_X)                
+                + (((1 - (dir & DIR_HV))               
+                * ((1) - 2 * ((dir & DIR_PM) >> 1)))   
+                << 4))                                 
+                | ((headpos & FILTRE_Y)                
+                + ((dir & DIR_HV)                      
+                * ((1) - 2 * ((dir & DIR_PM) >> 1)))); 
 
         if ((headpos & 0x0F) > 9)  headpos = (headpos & FILTRE_X) | 0x01;
         if ((headpos >> 4) > 9)    headpos = (headpos & FILTRE_Y) | 0x10;
