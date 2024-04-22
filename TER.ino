@@ -81,6 +81,7 @@ void setup()
     FastLED.addLeds<CHIPSET, LED_DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
     FastLED.setMaxPowerInVoltsAndMilliamps(5,500);  //garder absolument
     FastLED.clear();
+    FastLED.setBrightness(BRIGHTNESS);
     FastLED.show();
 
     // Setup pins
@@ -95,9 +96,9 @@ void setup()
     pinMode(PIN_L, INPUT_PULLUP);
     pinMode(PIN_D, INPUT_PULLUP);
     pinMode(PIN_R, INPUT_PULLUP);
-    pinMode(PIN_CARTOUCHE_0, INPUT); // surtout pas en INPUT_PULLUP, sinon quand on débranche la cartouche on voudrait 000 et on aurait 111
-    pinMode(PIN_CARTOUCHE_1, INPUT);
-    pinMode(PIN_CARTOUCHE_2, INPUT);
+    pinMode(PIN_CARTOUCHE_0, INPUT_PULLUP); // surtout pas en INPUT_PULLUP, sinon quand on débranche la cartouche on voudrait 000 et on aurait 111
+    pinMode(PIN_CARTOUCHE_1, INPUT_PULLUP);
+    pinMode(PIN_CARTOUCHE_2, INPUT_PULLUP);
 
     // Interruptions
     attachInterrupt(digitalPinToInterrupt(PIN_A), handle_A, RISING);
@@ -155,7 +156,7 @@ void loop()
      */
 
     // INITIALISATION
-    if (readCartouche() != IDP) { // permet de réinit la console si on enleve la cartouche (feature demandée par erwann)
+    if (7-readCartouche() != IDP) { // permet de réinit la console si on enleve la cartouche (feature demandée par erwann)
         #if DEBUG
             Serial.print("[?] IDP Change:\t");
         #endif
@@ -167,7 +168,7 @@ void loop()
              *Il faut penser à bitshift sinon on overwrite le premier bit
              *? On peut utiliser les pin Analog si jamais on a besoin de plus de pin Digital
              */
-            IDP = readCartouche();
+            IDP = 7-readCartouche();
             #if DEBUG
                 Serial.print("ID = ");
                 Serial.print(IDP);
@@ -188,7 +189,7 @@ void loop()
                 case FANORONA: tergame = (struct game_s){FANORONA, SEQUENTIEL, fanorona}; break;
                 case TRON: tergame = (struct game_s){TRON, SYNCHRONE, tron}; break;
                 case SELECTOR: tergame = (struct game_s){SELECTOR, SEQUENTIEL, selector}; break;
-                default: break;
+                default:  break;
             }
             tergame.state = RUN;
         }
@@ -455,6 +456,7 @@ void render(struct game_s game)
             }
         }
     }
+    FastLED.setBrightness(BRIGHTNESS);
     FastLED.show();
 }
 

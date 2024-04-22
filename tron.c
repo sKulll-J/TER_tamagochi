@@ -62,8 +62,8 @@ struct game_s tron(struct game_s game_data, uint8_t input)
     static uint8_t dir_P2 = INIT_DIRP2 ;
     static uint8_t size_P1 = 8;
     static uint8_t size_P2 = 8;
-    static uint8_t bodypos1[8];
-    static uint8_t bodypos2[8];
+    static uint8_t bodypos1[8]={0};
+    static uint8_t bodypos2[8]={0};
 
     static uint8_t count_01 = 0;
     static uint8_t count_input1 = 0;

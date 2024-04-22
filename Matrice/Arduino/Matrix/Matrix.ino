@@ -1,10 +1,12 @@
 #include <FastLED.h>
 
-#define LED_DATA_PIN  2     // Pin de données pour la matrice
+#define LED_DATA_PIN  9
+
+    // Pin de données pour la matrice
 
 #define COLOR_ORDER GRB
 #define CHIPSET     WS2812
-#define BRIGHTNESS 10       // luminosité réglable
+#define BRIGHTNESS 100       // luminosité réglable
 
 /* Fonction ciblage de LED
   XY(x, y) prend les coordonnées x et y et renvoie un numéro d'indice de LED, 

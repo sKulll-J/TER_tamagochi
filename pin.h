@@ -4,13 +4,13 @@
 // PIN de boutons
 #define PIN_A  6 // 24
 #define PIN_B  7 // 25
-#define PIN_D  2 // 20
-#define PIN_L 14 // 27
-#define PIN_U 15 // 26
-#define PIN_R 16 // 25
+#define PIN_D  3 // 20
+#define PIN_L 4 // 27
+#define PIN_U 2 // 26
+#define PIN_R 5 // 25
 
 // Fastled
-#define LED_DATA_PIN 3 // 21 
+#define LED_DATA_PIN 9 // 21 
 
 // PIN de la cartouche 
 #define PIN_CARTOUCHE_0 12 // 30

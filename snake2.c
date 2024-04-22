@@ -20,13 +20,14 @@ struct game_s snake(struct game_s game_data, uint8_t input)
 {
     // DECLARATIONS / INITIALISATIONS --------------------------
     // static ch_lst *corpschaine = NULL;    // init ma liste chainée
+    
+    static uint8_t bodypos[2];
     static uint8_t flag = 0x03;             // set les flags utilisés dans le projet
     static uint8_t headpos = 0x55;          // position au milieu
     static uint8_t pmpos;                   // position de la pomme
     static uint8_t dir = 0x03;              // un bit pour VERTICAL/HORIZONTAL un bit pour +/-
     static unsigned long pasttime = 1000.0;
     static uint8_t snakesize = 3;
-    static uint8_t bodypos[18];
 
     switch (flag) {
         case FLAG_INIT:      //initialise le corps du snake
@@ -111,15 +112,15 @@ struct game_s snake(struct game_s game_data, uint8_t input)
 
 
         // Affiche la pomme
-        game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPP; 
+        //game_data.printmatrix[(pmpos & 0x0F) - 1][(pmpos >> 4) - 1] = COL_OPP; 
 
         // Affiche toutes les part du corps
         //p=corpschaine;
-        for (int i=0; i<snakesize; i++) {            
+        /*for (int i=0; i<snakesize; i++) {            
             game_data.printmatrix[(bodypos[i] & FILTRE_Y) - 1][(bodypos[i] >> 4) - 1] = COL_OPP; 
             //p=p->prec;
-        }
-        
+        }*/
+        game_data.printmatrix[(headpos & FILTRE_Y) - 1][(headpos >> 4) - 1] = COL_OPP; 
     }
 /*
     switch case droite gauche haut bas

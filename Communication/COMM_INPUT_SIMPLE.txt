@@ -1,0 +1,42 @@
+#include<SoftwareSerial.h>
+
+SoftwareSerial terserial(2, 3); // RX, TX
+
+char* dataIn[20];
+
+void setup() {
+  // put your setup code here, to run once:
+    Serial.begin(9600);
+        terserial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+    if(terserial.available())
+    {
+        Serial.println(terserial.read());
+    }
+    if(Serial.available())
+    {
+        int var=Serial.read();
+        if(var!=13 && var!=10)
+        {
+            if(var==117)//u
+                terserial.write(0b00100000);
+            else if(var==100)//d
+                terserial.write(0b00010000);
+            else if(var==108)//l      
+                terserial.write(0b00000100);
+            else if(var==114)//r
+                terserial.write(0b00001000);
+            else if(var==97)//a
+                terserial.write(0b00000001);
+            else if(var==98)//b
+                terserial.write(0b00000010);
+
+            else terserial.write(20);
+
+        }
+
+    }
+}

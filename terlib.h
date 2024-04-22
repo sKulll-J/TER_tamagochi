@@ -45,10 +45,10 @@
 // game_type - choix du jeu actuel (snake, morpion etc)
 #define NONE        0
 #define SNAKE       1  
-#define MEGAMORPION 2
+#define MEGAMORPION 5
 #define FANORONA    3
-#define TRON        4
-#define SELECTOR    5
+#define TRON        6
+#define SELECTOR    4
 
 // game_mode
 #define UNDEFINED   0   // undefined

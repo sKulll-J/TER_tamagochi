@@ -18,7 +18,7 @@
 #define ter_M 4
 
 #define COULEUR_J1 ter_J
-#define COULEUR_J2 ter_B
+#define COULEUR_J2 ter_M
 
 #define ROUGE     CRGB(  0, 255,   0)
 #define ROUGE_C   CRGB(255, 119, 119)
